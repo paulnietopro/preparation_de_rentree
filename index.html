@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Préparation de rentrée</title>
+    <!-- Tailwind CSS pour un design moderne -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SheetJS pour la lecture des fichiers Excel (.xlsx, .xls) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col">
+
+    <!-- En-tête -->
+    <header class="bg-blue-900 text-white shadow-md py-4 px-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold">Préparation de rentrée</h1>
+        <div class="flex items-center space-x-3">
+            <button onclick="exportDataJSON()" title="Sauvegarder / Exporter les données" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-lg shadow-sm border border-blue-700 transition-colors flex items-center space-x-1 cursor-pointer">
+                <span>💾</span>
+                <span class="text-xs font-medium">Exporter</span>
+            </button>
+            <label title="Ouvrir une sauvegarde" class="bg-blue-800 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-xs font-medium shadow-sm border border-blue-700 transition-colors cursor-pointer flex items-center space-x-1">
+                <span>📂</span>
+                <span>Ouvrir</span>
+                <input type="file" id="importJsonFile" accept=".json" class="hidden" onchange="importDataJSON(event)">
+            </label>
+        </div>
+    </header>
+
+    <!-- Navigation par Onglets -->
+    <nav class="bg-white border-b border-gray-200 px-6 flex space-x-8 shadow-sm overflow-x-auto">
+        <button onclick="switchTab('structure')" id="btn-structure" class="py-4 px-2 font-semibold border-b-2 border-blue-600 text-blue-600 focus:outline-none transition-colors whitespace-nowrap">
+            Structure
+        </button>
+        <button onclick="switchTab('dotation')" id="btn-dotation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Dotation
+        </button>
+        <button onclick="switchTab('enseignant')" id="btn-enseignant" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Enseignant
+        </button>
+        <button onclick="switchTab('discipline')" id="btn-discipline" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Discipline
+        </button>
+        <button onclick="switchTab('ventilation')" id="btn-ventilation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Ventilation par discipline
+        </button>
+        <button onclick="switchTab('pre-affectation')" id="btn-pre-affectation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Pré Affectation des enseignants
+        </button>
+        <button onclick="switchTab('affectation')" id="btn-affectation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Affectation des enseignants
+        </button>
+    </nav>
+
+    <!-- Contenu Principal -->
+    <main class="flex-grow p-6 max-w-7xl mx-auto w-full">
+
+        <!-- ONGLET 1 : STRUCTURE -->
+        <section id="tab-structure" class="tab-content active space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+                <div>
+                    <h2 class="text-lg font-semibold mb-2 text-blue-900">Configuration des structures de classes</h2>
+                    <p class="text-sm text-gray-600 mb-6">Saisissez le nombre de classes à configurer pour chaque filière.</p>
+                </div>
+
+                <!-- Section Générale et Supérieure -->
+                <div>
+                    <h3 class="text-md font-bold text-gray-800 mb-3 border-b pb-2">Classes Générales et Supérieures</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="structure-general-container">
+                        <!-- Généré en JS -->
+                    </div>
+                </div>
+
+                <!-- Section Technologique -->
+                <div class="pt-4">
+                    <h3 class="text-md font-bold text-gray-800 mb-3 border-b pb-2">Classes Technologiques</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="structure-techno-container">
+                        <!-- Généré en JS -->
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="saveStructure()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer la structure
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bloc d'affichage et personnalisation des noms et séries de classes -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-4 text-blue-900">Personnalisation des noms et séries de classes</h2>
+                <div id="structure-display" class="space-y-4">
+                    <!-- Généré dynamiquement en JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 2 : DOTATION -->
+        <section id="tab-dotation" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-900">Calcul de la dotation horaire (DGH)</h2>
+                        <p class="text-sm text-gray-600">Répartissez les heures pour la voie générale, technologique et l'ARE.</p>
+                    </div>
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 flex items-center space-x-3 shadow-sm">
+                        <span class="text-sm font-medium text-blue-900">DGH :</span>
+                        <span id="global-dotation-total" class="text-lg font-bold text-blue-700">0 h</span>
+                    </div>
+                </div>
+
+                <!-- BLOC 1 : VOIE GÉNÉRALE -->
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="text-md font-bold text-blue-900">1. Voie Générale et Supérieure</h3>
+                        <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                            Sous-total Voie Générale : <span id="subtotal-generale">0</span> h
+                        </div>
+                    </div>
+                    <div id="voie-generale-container" class="space-y-4">
+                        <!-- Généré en JS -->
+                    </div>
+                </div>
+
+                <!-- BLOC 2 : VOIE TECHNOLOGIQUE -->
+                <div class="space-y-4 pt-6 border-t border-gray-200">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="text-md font-bold text-blue-900">2. Voie Technologique</h3>
+                        <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                            Sous-total Voie Technologique : <span id="subtotal-techno">0</span> h
+                        </div>
+                    </div>
+                    <div id="voie-techno-container" class="space-y-6">
+                        <!-- Généré en JS -->
+                    </div>
+                </div>
+
+                <!-- BLOC 3 : ARE -->
+                <div class="space-y-4 pt-6 border-t border-gray-200">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="text-md font-bold text-blue-900">3. ARE</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                                Sous-total ARE : <span id="subtotal-are">0</span> h
+                            </div>
+                            <button onclick="addAreCustomRow()" class="text-xs bg-white border border-gray-300 hover:bg-gray-100 text-blue-800 font-semibold py-1.5 px-3 rounded shadow-sm transition-colors">+ Ajouter une ligne ARE</button>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3" id="are-container">
+                        <!-- Ligne UNSS -->
+                        <div class="bg-gray-50 p-3 rounded border border-gray-200 flex items-center justify-between">
+                            <span class="text-sm font-semibold text-gray-700">UNSS</span>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" min="0" step="0.5" id="are-unss-input" value="0" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold">
+                                <span class="text-xs text-gray-500">h</span>
+                            </div>
+                        </div>
+
+                        <!-- Ligne Pondération 1re et Terminale -->
+                        <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-semibold text-blue-900">Pondération 1re et Terminale</span>
+                                <p class="text-[11px] text-gray-500">Calcul auto : <span id="are-pond-1t-calc">0</span> h (modifiable)</p>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" step="0.5" id="are-pond-1t-input" value="0" oninput="onPond1tUserChange()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold text-blue-900">
+                                <span class="text-xs text-gray-500">h</span>
+                            </div>
+                        </div>
+
+                        <!-- Ligne Pondération BTS -->
+                        <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
+                            <div>
+                                <span class="text-sm font-semibold text-blue-900">Pondération BTS</span>
+                                <p class="text-[11px] text-gray-500">0,25 × Heures BTS</p>
+                            </div>
+                            <div class="text-sm font-bold text-blue-800" id="are-pond-bts-display">0 h</div>
+                        </div>
+
+                        <!-- Conteneur lignes personnalisées ARE -->
+                        <div id="are-custom-container" class="space-y-2">
+                            <!-- Généré en JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="saveDotation()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer la dotation
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 3 : ENSEIGNANT -->
+        <section id="tab-enseignant" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-4 text-blue-900">Importation de la liste des enseignants</h2>
+                <div class="flex items-center space-x-4">
+                    <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                </div>
+                <p class="text-xs text-gray-500 mt-2">Le fichier doit contenir les colonnes : <strong>nom</strong>, <strong>prénom</strong> (ou prenom), <strong>discipline</strong>.</p>
+            </div>
+
+            <!-- Tableau des enseignants -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                    <h2 class="text-lg font-semibold text-blue-900">Liste des enseignants enregistrés</h2>
+                    <span id="teacher-count" class="text-sm bg-blue-100 text-blue-800 py-1 px-3 rounded-full font-medium">0 enseignant(s)</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                                <th onclick="sortTable('nom')" class="py-3 px-6 cursor-pointer hover:bg-gray-200 transition-colors">Nom ⥨</th>
+                                <th onclick="sortTable('prenom')" class="py-3 px-6 cursor-pointer hover:bg-gray-200 transition-colors">Prénom ⥨</th>
+                                <th onclick="sortTable('discipline')" class="py-3 px-6 cursor-pointer hover:bg-gray-200 transition-colors">Discipline ⥨</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teacher-table-body" class="divide-y divide-gray-200 text-sm">
+                            <tr>
+                                <td colspan="3" class="py-4 px-6 text-center text-gray-400">Aucun fichier chargé pour le moment.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 4 : DISCIPLINE -->
+        <section id="tab-discipline" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-2 text-blue-900">Affectation des disciplines par classe</h2>
+                <p class="text-sm text-gray-600 mb-6">Sélectionnez une ou plusieurs disciplines, cochez les classes concernées (ou utilisez la saisie en masse par niveau), puis enregistrez.</p>
+
+                <!-- Sélection des disciplines -->
+                <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-700 mb-3">1. Choisissez la ou les discipline(s) à affecter :</h3>
+                    <div id="disciplines-checkbox-container" class="flex flex-wrap gap-4">
+                        <span class="text-sm text-gray-400 italic">Veuillez d'abord charger un fichier enseignant.</span>
+                    </div>
+                </div>
+
+                <!-- Saisie en masse par niveau -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <h3 class="text-sm font-semibold text-blue-900 mb-3">2. Saisie en masse rapide (par niveau) :</h3>
+                    <div id="bulk-level-container" class="flex flex-wrap gap-3">
+                        <span class="text-sm text-gray-400 italic">Configurez d'abord la structure de l'établissement.</span>
+                    </div>
+                </div>
+
+                <!-- Grille des classes et cases à cocher -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-sm font-semibold text-gray-700">3. Sélection détaillée des classes :</h3>
+                        <div class="space-x-2">
+                            <button onclick="toggleAllClasses(true)" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded font-medium text-gray-700">Tout cocher</button>
+                            <button onclick="toggleAllClasses(false)" class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded font-medium text-gray-700">Tout décocher</button>
+                        </div>
+                    </div>
+                    <div id="classes-selection-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                        <span class="text-sm text-gray-400 italic">Aucune classe configurée.</span>
+                    </div>
+                </div>
+
+                <div class="flex justify-end">
+                    <button onclick="saveClassDisciplines()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer les affectations
+                    </button>
+                </div>
+            </div>
+
+            <!-- Récapitulatif des affectations -->
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-4 text-blue-900">Récapitulatif des disciplines par classe</h2>
+                <div id="discipline-recap-container" class="overflow-x-auto">
+                    <span class="text-sm text-gray-400 italic">Aucune affectation enregistrée.</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 5 : VENTILATION PAR DISCIPLINE -->
+        <section id="tab-ventilation" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-2 text-blue-900">Ventilation des heures par discipline et par classe</h2>
+                <p class="text-sm text-gray-600 mb-6">Définissez le nombre d'heures attribuées pour chaque discipline au sein des classes. Vous pouvez procéder classe par classe ou effectuer une saisie en masse par niveau ou par discipline.</p>
+
+                <!-- Section de saisie en masse -->
+                <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-100 space-y-4">
+                    <h3 class="text-sm font-semibold text-blue-900">Saisie en masse rapide :</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-end">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Discipline</label>
+                            <select id="bulk-vent-disc" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option value="">-- Choisir une discipline --</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Cible (Niveau ou Toutes)</label>
+                            <select id="bulk-vent-target" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option value="all">Tous les niveaux concernés</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">Nombre d'heures</label>
+                            <input type="number" id="bulk-vent-hours" min="0" step="0.5" placeholder="ex: 4" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <button onclick="applyBulkVentilation()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded text-sm shadow-sm transition-colors">
+                                Appliquer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tableau détaillé de ventilation -->
+                <div id="ventilation-container" class="space-y-6">
+                    <span class="text-sm text-gray-400 italic">Veuillez d'abord affecter des disciplines aux classes dans l'onglet "Discipline".</span>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="saveVentilations()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer la ventilation
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 6 : PRE AFFECTATION DES ENSEIGNANTS -->
+        <section id="tab-pre-affectation" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-900">Pré-affectation du nombre de classes par enseignant et par niveau</h2>
+                        <p class="text-sm text-gray-600">Indiquez pour chaque enseignant le nombre de classes qu'il aura en charge pour chacun des niveaux de l'établissement.</p>
+                    </div>
+                    <!-- Filtre par discipline -->
+                    <div class="w-full md:w-72">
+                        <label for="filter-pre-disc" class="block text-xs font-medium text-gray-700 mb-1">Filtrer par discipline :</label>
+                        <select id="filter-pre-disc" onchange="renderPreAffectationTable()" class="w-full border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                            <option value="all">Toutes les disciplines</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse" id="pre-affectation-table">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                                <th onclick="sortPreAffectationTable('enseignant')" class="py-3 px-4 border-b cursor-pointer hover:bg-gray-200 transition-colors">Enseignant ⥨</th>
+                                <th onclick="sortPreAffectationTable('discipline')" class="py-3 px-4 border-b cursor-pointer hover:bg-gray-200 transition-colors">Discipline ⥨</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pre-affectation-tbody" class="divide-y divide-gray-200 text-sm">
+                            <tr>
+                                <td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="savePreAffectations()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer les pré-affectations
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 7 : AFFECTATION DES ENSEIGNANTS -->
+        <section id="tab-affectation" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <h2 class="text-lg font-semibold mb-2 text-blue-900">Affectation des enseignants par classe</h2>
+                <p class="text-sm text-gray-600 mb-6">Chaque classe se voit affecter automatiquement un enseignant par défaut par discipline, en respectant les volumes saisis dans l'onglet "Pré Affectation". Vous pouvez modifier ces choix en direct.</p>
+
+                <div id="teacher-assignment-container" class="space-y-6">
+                    <span class="text-sm text-gray-400 italic">Veuillez d'abord configurer la structure, les enseignants et les disciplines par classe.</span>
+                </div>
+
+                <div class="mt-6 flex justify-end">
+                    <button onclick="saveTeacherAssignments()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
+                        Enregistrer les affectations d'enseignants
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Script JavaScript -->
+    <script>
+        // --- GESTION DES ONGLETS ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(el => {
+                el.classList.remove('border-blue-600', 'text-blue-600');
+                el.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            const activeBtn = document.getElementById(`btn-${tabName}`);
+            activeBtn.classList.remove('border-transparent', 'text-gray-500');
+            activeBtn.classList.add('border-blue-600', 'text-blue-600');
+
+            if (tabName === 'dotation') {
+                initDotationTab();
+            } else if (tabName === 'discipline') {
+                initDisciplineTab();
+            } else if (tabName === 'ventilation') {
+                initVentilationTab();
+            } else if (tabName === 'pre-affectation') {
+                initPreAffectationTab();
+            } else if (tabName === 'affectation') {
+                initAffectationTab();
+            }
+        }
+
+        // --- GESTION DES ENSEIGNANTS & EXCEL (SESSION STORAGE) ---
+        let teachersData = [];
+        let currentSortColumn = '';
+        let sortAscending = true;
+
+        let currentPreSortColumn = '';
+        let preSortAscending = true;
+
+        const niveauxGeneraux = [
+            { id: '2nd', label: 'Seconde', prefix: '2', defaultBase: 26.5, defaultComp: 12 },
+            { id: '1re', label: 'Première', prefix: '1G', defaultBase: 28, defaultComp: 8 },
+            { id: 'Tale', label: 'Terminale', prefix: 'TG', defaultBase: 27.5, defaultComp: 8 },
+            { id: 'BTS', label: 'BTS', prefix: 'BTS', defaultBase: 31, defaultComp: 0 }
+        ];
+
+        const niveauxTechnologiques = [
+            { id: '1re_TECH', label: '1ère Technologique', prefix: '1ST', defaultObligatoires: 15 },
+            { id: 'Tale_TECH', label: 'Terminale Technologique', prefix: 'TST', defaultObligatoires: 14 }
+        ];
+
+        const niveaux = [
+            { id: '3eme', label: '3ème', prefix: '3' },
+            ...niveauxGeneraux,
+            ...niveauxTechnologiques
+        ];
+
+        const technoSeries = ["STMG", "STI2D", "STL", "ST2S", "S2TMD", "STAV", "STD2A", "STHR"];
+
+        let userModifiedPond1t = false;
+
+        // --- EXPORT / IMPORT JSON VIA DISQUETTE ---
+        function exportDataJSON() {
+            let backupData = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                let key = sessionStorage.key(i);
+                backupData[key] = sessionStorage.getItem(key);
+            }
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(backupData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "sauvegarde_dgh_ecole.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function importDataJSON(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const backupData = JSON.parse(e.target.result);
+                    sessionStorage.clear();
+                    for (let key in backupData) {
+                        sessionStorage.setItem(key, backupData[key]);
+                    }
+                    alert("Sauvegarde restaurée avec succès !");
+                    location.reload();
+                } catch (error) {
+                    alert("Erreur lors de la lecture du fichier de sauvegarde : " + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        document.getElementById('excelFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    
+                    teachersData = json.map(row => {
+                        const newRow = {};
+                        Object.keys(row).forEach(key => {
+                            const cleanKey = key.trim().toLowerCase()
+                                .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                            newRow[cleanKey] = row[key];
+                        });
+                        return {
+                            nom: newRow.nom || newRow.name || '',
+                            prenom: newRow.prenom || newRow.firstname || '',
+                            discipline: newRow.discipline || newRow.matiere || ''
+                        };
+                    }).filter(t => t.nom !== '' || t.prenom !== '');
+
+                    sessionStorage.setItem('teachersData', JSON.stringify(teachersData));
+                    renderTeachersTable();
+                } catch (error) {
+                    alert("Erreur lors de la lecture du fichier Excel : " + error.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        function renderTeachersTable() {
+            const tbody = document.getElementById('teacher-table-body');
+            const countBadge = document.getElementById('teacher-count');
+            countBadge.textContent = `${teachersData.length} enseignant(s)`;
+
+            if (teachersData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" class="py-4 px-6 text-center text-gray-400">Aucune donnée trouvée ou fichier vide.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = teachersData.map(t => `
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-6 font-medium text-gray-900">${escapeHtml(String(t.nom))}</td>
+                    <td class="py-3 px-6 text-gray-700">${escapeHtml(String(t.prenom))}</td>
+                    <td class="py-3 px-6 text-gray-700">${escapeHtml(String(t.discipline))}</td>
+                </tr>
+            `).join('');
+        }
+
+        function sortTable(column) {
+            if (currentSortColumn === column) {
+                sortAscending = !sortAscending;
+            } else {
+                currentSortColumn = column;
+                sortAscending = true;
+            }
+
+            teachersData.sort((a, b) => {
+                let valA = String(a[column] || '').toLowerCase();
+                let valB = String(b[column] || '').toLowerCase();
+                if (valA < valB) return sortAscending ? -1 : 1;
+                if (valA > valB) return sortAscending ? 1 : -1;
+                return 0;
+            });
+
+            renderTeachersTable();
+        }
+
+        // --- GESTION DE LA STRUCTURE (SESSION STORAGE) ---
+        function initStructureForm() {
+            const genContainer = document.getElementById('structure-general-container');
+            const techContainer = document.getElementById('structure-techno-container');
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+
+            const structureGenList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux
+            ];
+
+            genContainer.innerHTML = structureGenList.map(niv => {
+                const count = counts[niv.id] || 0;
+                return `
+                    <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                        <label for="niv-${niv.id}" class="block text-sm font-medium text-gray-700 mb-2">Niveau ${niv.label}</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="niv-${niv.id}" min="0" value="${count}" onchange="updateStructureDisplayPreview()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="text-sm text-gray-500">classe(s)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            techContainer.innerHTML = niveauxTechnologiques.map(niv => {
+                const count = counts[niv.id] || 0;
+                return `
+                    <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                        <label for="niv-${niv.id}" class="block text-sm font-medium text-gray-700 mb-2">Niveau ${niv.label}</label>
+                        <div class="flex items-center space-x-2">
+                            <input type="number" id="niv-${niv.id}" min="0" value="${count}" onchange="updateStructureDisplayPreview()" class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <span class="text-sm text-gray-500">classe(s)</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            renderStructureDisplay(savedData);
+        }
+
+        function updateStructureDisplayPreview() {
+            const counts = {};
+            niveaux.forEach(niv => {
+                counts[niv.id] = parseInt(document.getElementById(`niv-${niv.id}`).value) || 0;
+            });
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            savedData.counts = counts;
+            renderStructureDisplay(savedData);
+        }
+
+        function saveStructure() {
+            const counts = {};
+            const customNames = {};
+            const classSeries = {};
+
+            niveaux.forEach(niv => {
+                counts[niv.id] = parseInt(document.getElementById(`niv-${niv.id}`).value) || 0;
+                customNames[niv.id] = [];
+                for (let i = 1; i <= counts[niv.id]; i++) {
+                    const inputEl = document.getElementById(`class-name-${niv.id}-${i}`);
+                    const defaultName = `${niv.prefix} ${i}`;
+                    customNames[niv.id].push(inputEl ? inputEl.value.trim() || defaultName : defaultName);
+
+                    if (niv.id === '1re_TECH' || niv.id === 'Tale_TECH') {
+                        const serieEl = document.getElementById(`class-serie-${niv.id}-${i}`);
+                        if (serieEl) {
+                            if (!classSeries[niv.id]) classSeries[niv.id] = [];
+                            classSeries[niv.id].push(serieEl.value);
+                        }
+                    }
+                }
+            });
+
+            const dataToSave = { counts, customNames, classSeries };
+            sessionStorage.setItem('schoolStructureData', JSON.stringify(dataToSave));
+            renderStructureDisplay(dataToSave);
+            alert("Structure et séries de l'établissement enregistrées temporairement (session) !");
+        }
+
+        function renderStructureDisplay(savedData) {
+            const displayContainer = document.getElementById('structure-display');
+            const counts = savedData.counts || {};
+            const customNames = savedData.customNames || {};
+            const classSeries = savedData.classSeries || {};
+            let hasClasses = false;
+
+            const structureDisplayList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+
+            let htmlContent = '';
+            structureDisplayList.forEach(niv => {
+                const count = counts[niv.id] || 0;
+                if (count > 0) {
+                    hasClasses = true;
+                    const isTech = (niv.id === '1re_TECH' || niv.id === 'Tale_TECH');
+
+                    htmlContent += `
+                        <div class="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0">
+                            <h3 class="text-sm font-semibold text-gray-700 mb-2">Niveau ${niv.label} (${count} classe${count > 1 ? 's' : ''})</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    `;
+                    for (let i = 1; i <= count; i++) {
+                        const defaultName = `${niv.prefix} ${i}`;
+                        const currentName = (customNames[niv.id] && customNames[niv.id][i - 1]) !== undefined 
+                            ? customNames[niv.id][i - 1] 
+                            : defaultName;
+
+                        htmlContent += `
+                            <div class="bg-gray-50 p-3 rounded border border-gray-200 space-y-2">
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Nom Classe ${i}</label>
+                                    <input type="text" id="class-name-${niv.id}-${i}" value="${escapeHtml(currentName)}" class="w-full border border-gray-300 rounded px-2 py-1 text-sm font-medium text-blue-900 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                </div>
+                        `;
+
+                        if (isTech) {
+                            const currentSerie = (classSeries[niv.id] && classSeries[niv.id][i - 1]) !== undefined
+                                ? classSeries[niv.id][i - 1]
+                                : technoSeries[0];
+
+                            htmlContent += `
+                                <div>
+                                    <label class="block text-xs text-gray-500 mb-1">Série</label>
+                                    <select id="class-serie-${niv.id}-${i}" class="w-full border border-gray-300 rounded px-2 py-1 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                        ${technoSeries.map(s => `<option value="${s}" ${s === currentSerie ? 'selected' : ''}>${s}</option>`).join('')}
+                                    </select>
+                                </div>
+                            `;
+                        }
+
+                        htmlContent += `</div>`;
+                    }
+                    htmlContent += `
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (!hasClasses) {
+                displayContainer.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune structure configurée pour le moment.</p>`;
+            } else {
+                displayContainer.innerHTML = htmlContent;
+            }
+        }
+
+        // --- GESTION DE L'ONGLET DOTATION ---
+        function initDotationTab() {
+            const genContainer = document.getElementById('voie-generale-container');
+            const technoContainer = document.getElementById('voie-techno-container');
+            const areCustomContainer = document.getElementById('are-custom-container');
+            
+            const structureData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = structureData.counts || {};
+            const classSeries = structureData.classSeries || {};
+            const dotationData = JSON.parse(sessionStorage.getItem('dotationDataNew')) || { generale: {}, techno: {}, are: { unss: 0, pond1tCustom: null, custom: [] } };
+
+            userModifiedPond1t = (dotationData.are && dotationData.are.pond1tCustom !== undefined && dotationData.are.pond1tCustom !== null);
+
+            // 1. VOIE GÉNÉRALE
+            let genHtml = '';
+            niveauxGeneraux.forEach(niv => {
+                const nbClasses = counts[niv.id] || 0;
+                const savedNivData = dotationData.generale[niv.id] || { 
+                    base: niv.defaultBase !== undefined ? niv.defaultBase : 0, 
+                    comp: niv.defaultComp !== undefined ? niv.defaultComp : 0, 
+                    custom: [] 
+                };
+
+                genHtml += `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 gen-level-block" data-gen-id="${niv.id}">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h4 class="text-sm font-bold text-gray-800">${niv.label} <span class="text-xs font-normal text-gray-500">(${nbClasses} classe${nbClasses > 1 ? 's' : ''})</span></h4>
+                            <div class="flex items-center space-x-3">
+                                <span class="text-xs font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded border border-blue-200">Sous-total : <span class="gen-subtotal-${niv.id}">0</span> h</span>
+                                <button onclick="addGenCustomRow('${niv.id}')" class="text-xs bg-white border border-gray-300 hover:bg-gray-100 text-blue-800 font-semibold py-1 px-2.5 rounded shadow-sm transition-colors">+ Ajouter une ligne</button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Base (× <input type="number" min="0" value="${nbClasses}" oninput="calculateDotationTotals()" class="w-14 inline-block border border-gray-300 rounded px-1 text-center text-xs gen-classes-multiplier font-bold"> classe(s))</label>
+                                <input type="number" min="0" step="0.5" id="gen-base-${niv.id}" value="${savedNivData.base !== undefined ? savedNivData.base : 0}" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-base-input">
+                            </div>
+                            <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Volume complémentaire</label>
+                                <input type="number" min="0" step="0.5" id="gen-comp-${niv.id}" value="${savedNivData.comp !== undefined ? savedNivData.comp : 0}" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-comp-input">
+                            </div>
+                        </div>
+                        <div id="gen-custom-container-${niv.id}" class="space-y-2">
+                `;
+
+                let customRows = savedNivData.custom || [];
+                customRows.forEach((cItem, cIdx) => {
+                    let customMult = cItem.multiplier !== undefined ? cItem.multiplier : nbClasses;
+                    genHtml += `
+                        <div class="flex items-center space-x-2 gen-custom-item bg-white p-2.5 rounded border border-gray-200 shadow-sm">
+                            <input type="text" value="${escapeHtml(cItem.label || '')}" placeholder="Intitulé de la ligne" class="flex-grow border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-c-label">
+                            <input type="number" min="0" step="0.5" value="${cItem.hours !== undefined ? cItem.hours : 0}" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-c-hours" placeholder="Heures">
+                            <div class="flex items-center space-x-1 text-xs text-gray-500 whitespace-nowrap">
+                                <span>×</span>
+                                <input type="number" min="0" value="${customMult}" oninput="calculateDotationTotals()" class="w-14 border border-gray-300 rounded px-1 text-center text-xs gen-c-mult font-bold" title="Nombre de classes">
+                                <span>classe(s)</span>
+                            </div>
+                            <button onclick="this.closest('.gen-custom-item').remove(); calculateDotationTotals();" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">&times;</button>
+                        </div>
+                    `;
+                });
+
+                genHtml += `</div></div>`;
+            });
+            genContainer.innerHTML = genHtml;
+
+            // 2. VOIE TECHNOLOGIQUE
+            let techHtml = '';
+            niveauxTechnologiques.forEach(niv => {
+                const nbClasses = counts[niv.id] || 0;
+                let levelSeriesArr = (classSeries[niv.id]) || [];
+                let savedTechLevelData = (dotationData.techno && dotationData.techno[niv.id]) || { 
+                    obligatoires: niv.defaultObligatoires !== undefined ? niv.defaultObligatoires : 0, 
+                    specialites: {}, 
+                    effectifs: {} 
+                };
+
+                let seriesInLevel = [];
+                for (let i = 1; i <= nbClasses; i++) {
+                    let s = levelSeriesArr[i - 1] || technoSeries[0];
+                    if (!seriesInLevel.includes(s)) seriesInLevel.push(s);
+                }
+                if (seriesInLevel.length === 0 && nbClasses > 0) {
+                    seriesInLevel.push("STMG");
+                }
+
+                techHtml += `
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 space-y-4 techno-level-block" data-tech-level="${niv.id}">
+                        <div class="flex justify-between items-center border-b pb-3">
+                            <h4 class="text-md font-bold text-blue-900">${niv.label} <span class="text-xs font-normal text-gray-500">(${nbClasses} classe${nbClasses > 1 ? 's' : ''})</span></h4>
+                            <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                                Sous-total ${niv.label} : <span class="techno-level-subtotal">0</span> h
+                            </div>
+                        </div>
+
+                        <!-- Enseignements obligatoires -->
+                        <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Enseignements obligatoires (× ${nbClasses} classe${nbClasses > 1 ? 's' : ''})</label>
+                            <input type="number" min="0" step="0.5" value="${savedTechLevelData.obligatoires !== undefined ? savedTechLevelData.obligatoires : 0}" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 techno-obligatoires-input" data-classes="${nbClasses}">
+                        </div>
+
+                        <!-- Lignes par série -->
+                        <div class="space-y-3">
+                `;
+
+                seriesInLevel.forEach(serie => {
+                    let countSerieClasses = levelSeriesArr.filter(s => s === serie).length;
+                    if (countSerieClasses === 0 && nbClasses > 0) countSerieClasses = nbClasses;
+
+                    let savedSpe = (savedTechLevelData.specialites && savedTechLevelData.specialites[serie] !== undefined) ? savedTechLevelData.specialites[serie] : 0;
+                    let savedEff = (savedTechLevelData.effectifs && savedTechLevelData.effectifs[serie] !== undefined) ? savedTechLevelData.effectifs[serie] : 0;
+
+                    let facteur = (serie === 'STMG') ? 8 : (serie === 'STI2D' ? 14 : 10);
+                    let calcReduit = Math.ceil(((savedEff / 29) * facteur) * 2) / 2;
+
+                    techHtml += `
+                        <div class="bg-white p-4 rounded border border-gray-200 shadow-sm space-y-3 techno-serie-subblock" data-serie="${serie}">
+                            <div class="flex justify-between items-center text-xs font-bold text-blue-900 border-b pb-1">
+                                <span>Série : ${serie} (${countSerieClasses} classe${countSerieClasses > 1 ? 's' : ''})</span>
+                                <span class="text-gray-500 font-normal">Facteur GER : ${facteur}</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Enseignement de spécialité + ${serie} (× ${countSerieClasses})</label>
+                                    <input type="number" min="0" step="0.5" value="${savedSpe}" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 techno-spe-input" data-serie-classes="${countSerieClasses}">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Effectif total de la série</label>
+                                    <input type="number" min="0" value="${savedEff}" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 techno-eff-input">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Volume comp. - GER (arrondi 0.5+)</label>
+                                    <div class="flex items-center space-x-2">
+                                        <input type="text" readonly value="${calcReduit} h" class="w-full border border-gray-200 rounded px-2 py-1 text-sm bg-gray-50 text-gray-700 font-medium techno-ger-display">
+                                        <span class="text-[10px] text-gray-400 italic">({eff}/29)*${facteur}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                techHtml += `</div></div>`;
+            });
+            technoContainer.innerHTML = techHtml;
+
+            // 3. ARE
+            const savedAre = dotationData.are || { unss: 0, pond1tCustom: null, custom: [] };
+            document.getElementById('are-unss-input').value = savedAre.unss !== undefined ? savedAre.unss : 0;
+
+            let areCustomHtml = '';
+            let areCustomRows = savedAre.custom || [];
+            areCustomRows.forEach((item, idx) => {
+                areCustomHtml += `
+                    <div class="flex items-center space-x-2 are-custom-item bg-gray-50 p-2.5 rounded border border-gray-200 shadow-sm">
+                        <input type="text" value="${escapeHtml(item.label || '')}" placeholder="Intitulé de la ligne" class="flex-grow border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 are-c-label">
+                        <input type="number" min="0" step="0.5" value="${item.hours !== undefined ? item.hours : 0}" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 are-c-hours" placeholder="Heures">
+                        <span class="text-xs text-gray-500">h</span>
+                        <button onclick="this.closest('.are-custom-item').remove(); calculateDotationTotals();" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">&times;</button>
+                    </div>
+                `;
+            });
+            areCustomContainer.innerHTML = areCustomHtml;
+
+            calculateDotationTotals();
+
+            if (savedAre.pond1tCustom !== undefined && savedAre.pond1tCustom !== null) {
+                document.getElementById('are-pond-1t-input').value = savedAre.pond1tCustom;
+                userModifiedPond1t = true;
+            }
+        }
+
+        function onPond1tUserChange() {
+            userModifiedPond1t = true;
+            calculateDotationTotals();
+        }
+
+        function addAreCustomRow() {
+            const container = document.getElementById('are-custom-container');
+            const item = document.createElement('div');
+            item.className = "flex items-center space-x-2 are-custom-item bg-gray-50 p-2.5 rounded border border-gray-200 shadow-sm";
+            item.innerHTML = `
+                <input type="text" value="" placeholder="Intitulé de la ligne" class="flex-grow border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 are-c-label">
+                <input type="number" min="0" step="0.5" value="0" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 are-c-hours" placeholder="Heures">
+                <span class="text-xs text-gray-500">h</span>
+                <button onclick="this.closest('.are-custom-item').remove(); calculateDotationTotals();" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">&times;</button>
+            `;
+            container.appendChild(item);
+        }
+
+        function addGenCustomRow(nivId) {
+            const block = document.querySelector(`.gen-level-block[data-gen-id="${nivId}"]`);
+            const defaultMult = block.querySelector('.gen-classes-multiplier').value || 1;
+
+            const container = document.getElementById(`gen-custom-container-${nivId}`);
+            const item = document.createElement('div');
+            item.className = "flex items-center space-x-2 gen-custom-item bg-white p-2.5 rounded border border-gray-200 shadow-sm";
+            item.innerHTML = `
+                <input type="text" value="" placeholder="Intitulé de la ligne" class="flex-grow border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-c-label">
+                <input type="number" min="0" step="0.5" value="0" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 gen-c-hours" placeholder="Heures">
+                <div class="flex items-center space-x-1 text-xs text-gray-500 whitespace-nowrap">
+                    <span>×</span>
+                    <input type="number" min="0" value="${defaultMult}" oninput="calculateDotationTotals()" class="w-14 border border-gray-300 rounded px-1 text-center text-xs gen-c-mult font-bold" title="Nombre de classes">
+                    <span>classe(s)</span>
+                </div>
+                <button onclick="this.closest('.gen-custom-item').remove(); calculateDotationTotals();" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">&times;</button>
+            `;
+            container.appendChild(item);
+        }
+
+        function calculateDotationTotals() {
+            let totalGenerale = 0;
+            let totalTechno = 0;
+            let totalAre = 0;
+
+            // 1. Calcul Voie Générale
+            niveauxGeneraux.forEach(niv => {
+                const block = document.querySelector(`.gen-level-block[data-gen-id="${niv.id}"]`);
+                if (!block) return;
+
+                const nbClasses = parseFloat(block.querySelector('.gen-classes-multiplier').value) || 0;
+                const baseVal = parseFloat(block.querySelector('.gen-base-input').value) || 0;
+                const compVal = parseFloat(block.querySelector('.gen-comp-input').value) || 0;
+
+                let subNivTotal = (baseVal + compVal) * nbClasses;
+
+                block.querySelectorAll('.gen-custom-item').forEach(item => {
+                    const hVal = parseFloat(item.querySelector('.gen-c-hours').value) || 0;
+                    const multVal = parseFloat(item.querySelector('.gen-c-mult').value) || 0;
+                    subNivTotal += hVal * multVal;
+                });
+
+                block.querySelector(`.gen-subtotal-${niv.id}`).textContent = Math.round(subNivTotal * 100) / 100;
+                totalGenerale += subNivTotal;
+            });
+
+            // 2. Calcul Voie Technologique
+            const technoLevelBlocks = document.querySelectorAll('.techno-level-block');
+            technoLevelBlocks.forEach(block => {
+                const oblInput = block.querySelector('.techno-obligatoires-input');
+                const nbClassesTech = parseFloat(oblInput.dataset.classes) || 0;
+                const oblVal = parseFloat(oblInput.value) || 0;
+
+                let subLevelTotal = oblVal * nbClassesTech;
+
+                block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
+                    const serie = subBlock.dataset.serie;
+                    const facteur = (serie === 'STMG') ? 8 : (serie === 'STI2D' ? 14 : 10);
+                    const speInput = subBlock.querySelector('.techno-spe-input');
+                    const serieClasses = parseFloat(speInput.dataset.serieClasses) || 0;
+                    const speVal = parseFloat(speInput.value) || 0;
+                    const effVal = parseFloat(subBlock.querySelector('.techno-eff-input').value) || 0;
+
+                    const rawReduit = (effVal / 29) * facteur;
+                    const calcReduit = Math.ceil(rawReduit * 2) / 2;
+                    subBlock.querySelector('.techno-ger-display').value = `${calcReduit} h`;
+
+                    subLevelTotal += (speVal * serieClasses) + calcReduit;
+                });
+
+                block.querySelector('.techno-level-subtotal').textContent = Math.round(subLevelTotal * 100) / 100;
+                totalTechno += subLevelTotal;
+            });
+
+            // 3. Calcul ARE
+            let heuresBaseEtCustom1T = 0;
+            let nbClasses1T = 0;
+
+            ['1re', 'Tale'].forEach(nivId => {
+                const block = document.querySelector(`.gen-level-block[data-gen-id="${nivId}"]`);
+                if (block) {
+                    const nbClasses = parseFloat(block.querySelector('.gen-classes-multiplier').value) || 0;
+                    const baseVal = parseFloat(block.querySelector('.gen-base-input').value) || 0;
+                    heuresBaseEtCustom1T += baseVal * nbClasses;
+                    nbClasses1T += nbClasses;
+
+                    block.querySelectorAll('.gen-custom-item').forEach(item => {
+                        heuresBaseEtCustom1T += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
+                    });
+                }
+            });
+
+            niveauxTechnologiques.forEach(niv => {
+                const block = document.querySelector(`.techno-level-block[data-tech-level="${niv.id}"]`);
+                if (block) {
+                    const oblInput = block.querySelector('.techno-obligatoires-input');
+                    const nbClassesTech = parseFloat(oblInput.dataset.classes) || 0;
+                    heuresBaseEtCustom1T += (parseFloat(oblInput.value) || 0) * nbClassesTech;
+                    nbClasses1T += nbClassesTech;
+
+                    block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
+                        const speInput = subBlock.querySelector('.techno-spe-input');
+                        const serieClasses = parseFloat(speInput.dataset.serieClasses) || 0;
+                        heuresBaseEtCustom1T += (parseFloat(speInput.value) || 0) * serieClasses;
+                    });
+                }
+            });
+
+            let calcPond1T = (0.1 * heuresBaseEtCustom1T) - (0.1 * 2 * nbClasses1T);
+            calcPond1T = Math.round(calcPond1T * 100) / 100;
+            document.getElementById('are-pond-1t-calc').textContent = calcPond1T;
+
+            const pond1tInput = document.getElementById('are-pond-1t-input');
+            if (!userModifiedPond1t) {
+                pond1tInput.value = calcPond1T;
+            }
+            let pond1TVal = parseFloat(pond1tInput.value) || 0;
+
+            // Pondération BTS (Voie Générale 'BTS')
+            let heuresBts = 0;
+            const btsBlock = document.querySelector(`.gen-level-block[data-gen-id="BTS"]`);
+            if (btsBlock) {
+                const nbClasses = parseFloat(btsBlock.querySelector('.gen-classes-multiplier').value) || 0;
+                const baseVal = parseFloat(btsBlock.querySelector('.gen-base-input').value) || 0;
+                const compVal = parseFloat(btsBlock.querySelector('.gen-comp-input').value) || 0;
+                heuresBts += (baseVal + compVal) * nbClasses;
+
+                btsBlock.querySelectorAll('.gen-custom-item').forEach(item => {
+                    heuresBts += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
+                });
+            }
+
+            let pondBts = 0.25 * heuresBts;
+            pondBts = Math.round(pondBts * 100) / 100;
+            document.getElementById('are-pond-bts-display').textContent = `${pondBts} h`;
+
+            // UNSS et lignes personnalisées ARE
+            const unssVal = parseFloat(document.getElementById('are-unss-input').value) || 0;
+            totalAre += unssVal + pond1TVal + pondBts;
+
+            document.querySelectorAll('.are-custom-item').forEach(item => {
+                totalAre += parseFloat(item.querySelector('.are-c-hours').value) || 0;
+            });
+
+            document.getElementById('subtotal-are').textContent = Math.round(totalAre * 100) / 100;
+
+            // Affichage des sous-totaux et total global
+            document.getElementById('subtotal-generale').textContent = Math.round(totalGenerale * 100) / 100;
+            document.getElementById('subtotal-techno').textContent = Math.round(totalTechno * 100) / 100;
+
+            let globalDgh = totalGenerale + totalTechno + totalAre;
+            document.getElementById('global-dotation-total').textContent = `${Math.round(globalDgh * 100) / 100} h`;
+        }
+
+        function saveDotation() {
+            const dotationData = { generale: {}, techno: {}, are: {} };
+
+            niveauxGeneraux.forEach(niv => {
+                const block = document.querySelector(`.gen-level-block[data-gen-id="${niv.id}"]`);
+                if (!block) return;
+
+                const baseInput = block.querySelector('.gen-base-input');
+                const compInput = block.querySelector('.gen-comp-input');
+                
+                let custom = [];
+                block.querySelectorAll('.gen-custom-item').forEach(item => {
+                    const lInput = item.querySelector('.gen-c-label');
+                    const hInput = item.querySelector('.gen-c-hours');
+                    const mInput = item.querySelector('.gen-c-mult');
+                    custom.push({
+                        label: lInput ? lInput.value.trim() : '',
+                        hours: hInput ? parseFloat(hInput.value) || 0 : 0,
+                        multiplier: mInput ? parseFloat(mInput.value) || 0 : 0
+                    });
+                });
+
+                dotationData.generale[niv.id] = {
+                    base: baseInput ? parseFloat(baseInput.value) || 0 : 0,
+                    comp: compInput ? parseFloat(compInput.value) || 0 : 0,
+                    custom: custom
+                };
+            });
+
+            niveauxTechnologiques.forEach(niv => {
+                const block = document.querySelector(`.techno-level-block[data-tech-level="${niv.id}"]`);
+                if (!block) return;
+
+                const oblVal = parseFloat(block.querySelector('.techno-obligatoires-input').value) || 0;
+                let effectifs = {};
+                let specialites = {};
+
+                block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
+                    const serie = subBlock.dataset.serie;
+                    effectifs[serie] = parseFloat(subBlock.querySelector('.techno-eff-input').value) || 0;
+                    specialites[serie] = parseFloat(subBlock.querySelector('.techno-spe-input').value) || 0;
+                });
+
+                dotationData.techno[niv.id] = {
+                    obligatoires: oblVal,
+                    effectifs: effectifs,
+                    specialites: specialites
+                };
+            });
+
+            // Sauvegarde ARE
+            const unssVal = parseFloat(document.getElementById('are-unss-input').value) || 0;
+            const pond1tCustomVal = userModifiedPond1t ? (parseFloat(document.getElementById('are-pond-1t-input').value) || 0) : null;
+            let areCustom = [];
+            document.querySelectorAll('.are-custom-item').forEach(item => {
+                const lInput = item.querySelector('.are-c-label');
+                const hInput = item.querySelector('.are-c-hours');
+                areCustom.push({
+                    label: lInput ? lInput.value.trim() : '',
+                    hours: hInput ? parseFloat(hInput.value) || 0 : 0
+                });
+            });
+            dotationData.are = { unss: unssVal, pond1tCustom: pond1tCustomVal, custom: areCustom };
+
+            sessionStorage.setItem('dotationDataNew', JSON.stringify(dotationData));
+            alert("Dotation horaire enregistrée temporairement !");
+        }
+
+        // --- GESTION DE L'ONGLET DISCIPLINE ---
+        function getComputedClassList() {
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+            const customNames = savedData.customNames || {};
+            let allClasses = [];
+
+            const structureList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+
+            structureList.forEach(niv => {
+                const count = counts[niv.id] || 0;
+                for (let i = 1; i <= count; i++) {
+                    const defaultName = `${niv.prefix} ${i}`;
+                    const name = (customNames[niv.id] && customNames[niv.id][i - 1]) !== undefined
+                        ? customNames[niv.id][i - 1]
+                        : defaultName;
+                    allClasses.push({ id: `${niv.id}-${i}`, name: name, levelId: niv.id, levelLabel: niv.label });
+                }
+            });
+            return allClasses;
+        }
+
+        function initDisciplineTab() {
+            const discContainer = document.getElementById('disciplines-checkbox-container');
+            const uniqueDisciplines = [...new Set(teachersData.map(t => t.discipline).filter(d => d && d.trim() !== ''))].sort();
+
+            if (uniqueDisciplines.length === 0) {
+                discContainer.innerHTML = `<span class="text-sm text-gray-400 italic">Aucune discipline trouvée. Veuillez d'abord charger un fichier enseignant.</span>`;
+            } else {
+                discContainer.innerHTML = uniqueDisciplines.map((disc, idx) => `
+                    <label class="inline-flex items-center space-x-2 bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50">
+                        <input type="checkbox" name="selected-disc" value="${escapeHtml(disc)}" class="rounded text-blue-600 focus:ring-blue-500 h-4 w-4">
+                        <span class="text-sm font-medium text-gray-700">${escapeHtml(disc)}</span>
+                    </label>
+                `).join('');
+            }
+
+            const bulkContainer = document.getElementById('bulk-level-container');
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+
+            const structureList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+
+            let activeLevels = structureList.filter(niv => (counts[niv.id] || 0) > 0);
+            if (activeLevels.length === 0) {
+                bulkContainer.innerHTML = `<span class="text-sm text-gray-400 italic">Aucune classe configurée dans l'onglet Structure.</span>`;
+            } else {
+                bulkContainer.innerHTML = activeLevels.map(niv => `
+                    <button onclick="selectLevelClasses('${niv.id}')" class="bg-white border border-blue-200 text-blue-700 hover:bg-blue-100 text-xs font-semibold py-1.5 px-3 rounded shadow-sm transition-colors">
+                        Cocher tout niveau ${niv.label}
+                    </button>
+                `).join('');
+            }
+
+            const classesContainer = document.getElementById('classes-selection-container');
+            const allClasses = getComputedClassList();
+
+            if (allClasses.length === 0) {
+                classesContainer.innerHTML = `<span class="text-sm text-gray-400 italic">Aucune classe configurée.</span>`;
+            } else {
+                classesContainer.innerHTML = allClasses.map(cls => `
+                    <label class="flex items-center space-x-3 bg-gray-50 p-3 rounded-lg border border-gray-200 hover:bg-white shadow-sm cursor-pointer transition-colors">
+                        <input type="checkbox" name="class-checkbox" value="${escapeHtml(cls.name)}" data-level="${cls.levelId}" class="rounded text-blue-600 focus:ring-blue-500 h-4 w-4">
+                        <span class="text-sm font-semibold text-blue-900">${escapeHtml(cls.name)} <span class="text-xs font-normal text-gray-500">(${cls.levelLabel})</span></span>
+                    </label>
+                `).join('');
+            }
+
+            renderDisciplineRecap();
+        }
+
+        function selectLevelClasses(levelId) {
+            const checkboxes = document.querySelectorAll('input[name="class-checkbox"]');
+            checkboxes.forEach(cb => {
+                if (cb.getAttribute('data-level') === levelId) {
+                    cb.checked = true;
+                }
+            });
+        }
+
+        function toggleAllClasses(checked) {
+            const checkboxes = document.querySelectorAll('input[name="class-checkbox"]');
+            checkboxes.forEach(cb => cb.checked = checked);
+        }
+
+        function saveClassDisciplines() {
+            const selectedDisciplines = Array.from(document.querySelectorAll('input[name="selected-disc"]:checked')).map(cb => cb.value);
+            const selectedClasses = Array.from(document.querySelectorAll('input[name="class-checkbox"]:checked')).map(cb => cb.value);
+
+            if (selectedDisciplines.length === 0) {
+                alert("Veuillez sélectionner au moins une discipline.");
+                return;
+            }
+            if (selectedClasses.length === 0) {
+                alert("Veuillez sélectionner au moins une classe.");
+                return;
+            }
+
+            let assignments = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+
+            selectedClasses.forEach(className => {
+                if (!assignments[className]) {
+                    assignments[className] = [];
+                }
+                selectedDisciplines.forEach(disc => {
+                    if (!assignments[className].includes(disc)) {
+                        assignments[className].push(disc);
+                    }
+                });
+            });
+
+            sessionStorage.setItem('classDisciplinesAssignments', JSON.stringify(assignments));
+            renderDisciplineRecap();
+            alert("Affectations enregistrées temporairement !");
+        }
+
+        function removeDisciplineFromClass(className, discipline) {
+            let assignments = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            if (assignments[className]) {
+                assignments[className] = assignments[className].filter(d => d !== discipline);
+                if (assignments[className].length === 0) {
+                    delete assignments[className];
+                }
+                sessionStorage.setItem('classDisciplinesAssignments', JSON.stringify(assignments));
+                renderDisciplineRecap();
+            }
+        }
+
+        function renderDisciplineRecap() {
+            const recapContainer = document.getElementById('discipline-recap-container');
+            const assignments = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const allClasses = getComputedClassList();
+
+            if (Object.keys(assignments).length === 0) {
+                recapContainer.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune affectation enregistrée pour le moment.</p>`;
+                return;
+            }
+
+            let html = `
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                            <th class="py-3 px-4 border-b">Classe</th>
+                            <th class="py-3 px-4 border-b">Disciplines affectées</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 text-sm">
+            `;
+
+            allClasses.forEach(cls => {
+                const discs = assignments[cls.name] || [];
+                if (discs.length > 0) {
+                    html += `
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-3 px-4 font-semibold text-blue-900 w-1/4">${escapeHtml(cls.name)}</td>
+                            <td class="py-3 px-4">
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${discs.map(d => `
+                                        <span class="inline-flex items-center bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-2.5 py-1 rounded-full">
+                                            ${escapeHtml(d)}
+                                            <button onclick="removeDisciplineFromClass('${escapeHtml(cls.name)}', '${escapeHtml(d)}')" class="ml-1.5 text-blue-400 hover:text-red-600 font-bold focus:outline-none">&times;</button>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            });
+
+            html += `</tbody></table>`;
+            recapContainer.innerHTML = html;
+        }
+
+        // --- GESTION DE L'ONGLET VENTILATION PAR DISCIPLINE ---
+        function initVentilationTab() {
+            const container = document.getElementById('ventilation-container');
+            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const ventilations = JSON.parse(sessionStorage.getItem('classVentilationHours')) || {};
+            const allClasses = getComputedClassList();
+
+            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+
+            const bulkSelect = document.getElementById('bulk-vent-disc');
+            const uniqueAssignedDiscs = [...new Set(Object.values(classDisciplines).flat())].sort();
+            bulkSelect.innerHTML = `<option value="">-- Choisir une discipline --</option>` + uniqueAssignedDiscs.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+
+            const targetSelect = document.getElementById('bulk-vent-target');
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+            
+            const structureList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+            const activeLevels = structureList.filter(niv => (counts[niv.id] || 0) > 0);
+
+            let targetHtml = `<option value="all">Tous les niveaux concernés</option>`;
+            activeLevels.forEach(niv => {
+                targetHtml += `<option value="${niv.id}">Niveau ${niv.label} uniquement</option>`;
+            });
+            targetSelect.innerHTML = targetHtml;
+
+            if (activeClasses.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Discipline".</p>`;
+                return;
+            }
+
+            let html = '';
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                html += `
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200" data-level="${cls.levelId}">
+                        <h3 class="text-md font-bold text-blue-900 mb-4 border-b border-gray-200 pb-2">Classe : ${escapeHtml(cls.name)} <span class="text-xs font-normal text-gray-500">(${cls.levelLabel})</span></h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                `;
+
+                discs.forEach(disc => {
+                    const hoursVal = (ventilations[cls.name] && ventilations[cls.name][disc] !== undefined) ? ventilations[cls.name][disc] : '';
+                    html += `
+                        <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">${escapeHtml(disc)}</label>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" min="0" step="0.5" id="vent-${escapeHtml(cls.name)}-${escapeHtml(disc)}" value="${hoursVal}" placeholder="0" class="vent-input w-full border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500" data-class="${escapeHtml(cls.name)}" data-level="${cls.levelId}" data-disc="${escapeHtml(disc)}">
+                                <span class="text-xs text-gray-500">h</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function applyBulkVentilation() {
+            const selectedDisc = document.getElementById('bulk-vent-disc').value;
+            const targetLevel = document.getElementById('bulk-vent-target').value;
+            const hoursVal = parseFloat(document.getElementById('bulk-vent-hours').value);
+
+            if (!selectedDisc) {
+                alert("Veuillez sélectionner une discipline pour la saisie en masse.");
+                return;
+            }
+            if (isNaN(hoursVal) || hoursVal < 0) {
+                alert("Veuillez saisir un nombre d'heures valide.");
+                return;
+            }
+
+            const inputs = document.querySelectorAll('.vent-input');
+            let countApplied = 0;
+
+            inputs.forEach(input => {
+                const disc = input.getAttribute('data-disc');
+                const level = input.getAttribute('data-level');
+
+                if (disc === selectedDisc) {
+                    if (targetLevel === 'all' || level === targetLevel) {
+                        input.value = hoursVal;
+                        countApplied++;
+                    }
+                }
+            });
+
+            alert(`Ventilation de ${hoursVal}h appliquée à ${countApplied} classe(s) pour la discipline "${selectedDisc}". Pensez à enregistrer.`);
+        }
+
+        function saveVentilations() {
+            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const allClasses = getComputedClassList();
+            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+
+            let ventilations = {};
+
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                ventilations[cls.name] = {};
+                discs.forEach(disc => {
+                    const inputEl = document.getElementById(`vent-${cls.name}-${disc}`);
+                    if (inputEl && inputEl.value !== '') {
+                        ventilations[cls.name][disc] = parseFloat(inputEl.value) || 0;
+                    }
+                });
+            });
+
+            sessionStorage.setItem('classVentilationHours', JSON.stringify(ventilations));
+            alert("Ventilation des heures enregistrée temporairement !");
+        }
+
+        // --- GESTION DE L'ONGLET PRE AFFECTATION DES ENSEIGNANTS ---
+        function initPreAffectationTab() {
+            const filterSelect = document.getElementById('filter-pre-disc');
+            const uniqueDisciplines = [...new Set(teachersData.map(t => t.discipline).filter(d => d && d.trim() !== ''))].sort();
+            
+            const currentSelected = filterSelect.value;
+            let filterHtml = `<option value="all">Toutes les disciplines</option>`;
+            uniqueDisciplines.forEach(d => {
+                const isSel = currentSelected === d ? 'selected' : '';
+                filterHtml += `<option value="${escapeHtml(d)}" ${isSel}>${escapeHtml(d)}</option>`;
+            });
+            filterSelect.innerHTML = filterHtml;
+
+            renderPreAffectationTable();
+        }
+
+        function renderPreAffectationTable() {
+            const tableHeadRow = document.querySelector('#pre-affectation-table thead tr');
+            const tbody = document.getElementById('pre-affectation-tbody');
+            const selectedFilterDisc = document.getElementById('filter-pre-disc').value;
+
+            if (teachersData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</td></tr>`;
+                return;
+            }
+
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+            
+            const structureList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+            const activeLevels = structureList.filter(niv => (counts[niv.id] || 0) > 0);
+
+            if (activeLevels.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucune structure ou classe configurée dans l'onglet "Structure".</td></tr>`;
+                return;
+            }
+
+            let headHtml = `
+                <th onclick="sortPreAffectationTable('enseignant')" class="py-3 px-4 border-b cursor-pointer hover:bg-gray-200 transition-colors">Enseignant ⥨</th>
+                <th onclick="sortPreAffectationTable('discipline')" class="py-3 px-4 border-b cursor-pointer hover:bg-gray-200 transition-colors">Discipline ⥨</th>
+            `;
+            activeLevels.forEach(niv => {
+                headHtml += `<th class="py-3 px-4 border-b text-center">${escapeHtml(niv.label)}</th>`;
+            });
+            tableHeadRow.innerHTML = headHtml;
+
+            const preAffectations = JSON.parse(sessionStorage.getItem('teacherPreAffectations')) || {};
+            teachersData.forEach((t) => {
+                const teacherKey = `${t.nom}_${t.prenom}_${t.discipline}`;
+                if (!preAffectations[teacherKey]) preAffectations[teacherKey] = {};
+                activeLevels.forEach(niv => {
+                    const input = document.getElementById(`pre-${teacherKey}-${niv.id}`);
+                    if (input) {
+                        preAffectations[teacherKey][niv.id] = parseInt(input.value) || 0;
+                    }
+                });
+            });
+
+            let filteredTeachers = teachersData.filter(t => {
+                if (selectedFilterDisc === 'all') return true;
+                return t.discipline.trim().toLowerCase() === selectedFilterDisc.trim().toLowerCase();
+            });
+
+            let sortedTeachers = [...filteredTeachers];
+            if (currentPreSortColumn) {
+                sortedTeachers.sort((a, b) => {
+                    let valA = '', valB = '';
+                    if (currentPreSortColumn === 'enseignant') {
+                        valA = `${a.nom} ${a.prenom}`.toLowerCase();
+                        valB = `${b.nom} ${b.prenom}`.toLowerCase();
+                    } else if (currentPreSortColumn === 'discipline') {
+                        valA = (a.discipline || '').toLowerCase();
+                        valB = (b.discipline || '').toLowerCase();
+                    }
+                    if (valA < valB) return preSortAscending ? -1 : 1;
+                    if (valA > valB) return preSortAscending ? 1 : -1;
+                    return 0;
+                });
+            }
+
+            if (sortedTeachers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${2 + activeLevels.length}" class="py-4 px-4 text-center text-gray-400">Aucun enseignant trouvé pour cette discipline.</td></tr>`;
+                return;
+            }
+
+            let bodyHtml = '';
+            sortedTeachers.forEach((t) => {
+                const teacherKey = `${t.nom}_${t.prenom}_${t.discipline}`;
+                bodyHtml += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-4 font-medium text-gray-900">${escapeHtml(t.nom)} ${escapeHtml(t.prenom)}</td>
+                        <td class="py-3 px-4 text-gray-700">${escapeHtml(t.discipline)}</td>
+                `;
+
+                activeLevels.forEach(niv => {
+                    const val = (preAffectations[teacherKey] && preAffectations[teacherKey][niv.id]) !== undefined 
+                        ? preAffectations[teacherKey][niv.id] 
+                        : 0;
+                    bodyHtml += `
+                        <td class="py-3 px-4 text-center">
+                            <input type="number" min="0" id="pre-${escapeHtml(teacherKey)}-${niv.id}" value="${val}" data-teacher="${escapeHtml(teacherKey)}" data-level="${niv.id}" class="w-20 border border-gray-300 rounded px-2 py-1 text-center text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </td>
+                    `;
+                });
+
+                bodyHtml += `</tr>`;
+            });
+
+            tbody.innerHTML = bodyHtml;
+        }
+
+        function sortPreAffectationTable(column) {
+            if (currentPreSortColumn === column) {
+                preSortAscending = !preSortAscending;
+            } else {
+                currentPreSortColumn = column;
+                preSortAscending = true;
+            }
+            renderPreAffectationTable();
+        }
+
+        function savePreAffectations() {
+            const structureList = [
+                { id: '3eme', label: '3ème', prefix: '3' },
+                ...niveauxGeneraux,
+                ...niveauxTechnologiques
+            ];
+            const savedData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = savedData.counts || {};
+            const activeLevels = structureList.filter(niv => (counts[niv.id] || 0) > 0);
+
+            let preAffectations = JSON.parse(sessionStorage.getItem('teacherPreAffectations')) || {};
+
+            teachersData.forEach((t) => {
+                const teacherKey = `${t.nom}_${t.prenom}_${t.discipline}`;
+                if (!preAffectations[teacherKey]) preAffectations[teacherKey] = {};
+                activeLevels.forEach(niv => {
+                    const input = document.getElementById(`pre-${teacherKey}-${niv.id}`);
+                    if (input) {
+                        preAffectations[teacherKey][niv.id] = parseInt(input.value) || 0;
+                    }
+                });
+            });
+
+            sessionStorage.setItem('teacherPreAffectations', JSON.stringify(preAffectations));
+            alert("Pré-affectations enregistrées temporairement !");
+        }
+
+        // --- GESTION DE LA RÉPARTITION AUTOMATIQUE PAR DÉFAUT & AFFECTATION DES ENSEIGNANTS ---
+        function initAffectationTab() {
+            const container = document.getElementById('teacher-assignment-container');
+            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            let teacherAssignments = JSON.parse(sessionStorage.getItem('classTeacherAssignments')) || {};
+            let preAffectations = JSON.parse(sessionStorage.getItem('teacherPreAffectations')) || {};
+            const structureData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
+            const counts = structureData.counts || {};
+            const allClasses = getComputedClassList();
+
+            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+
+            if (activeClasses.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Discipline".</p>`;
+                return;
+            }
+
+            if (teachersData.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</p>`;
+                return;
+            }
+
+            let hasAnyPreAffectation = Object.keys(preAffectations).length > 0;
+            if (!hasAnyPreAffectation) {
+                let teachersByDisc = {};
+                teachersData.forEach(t => {
+                    const disc = t.discipline.trim().toLowerCase();
+                    if (!teachersByDisc[disc]) teachersByDisc[disc] = [];
+                    teachersByDisc[disc].push(t);
+                });
+
+                const structureList = [
+                    { id: '3eme', label: '3ème', prefix: '3' },
+                    ...niveauxGeneraux,
+                    ...niveauxTechnologiques
+                ];
+
+                structureList.forEach(niv => {
+                    const totalClassesInLevel = counts[niv.id] || 0;
+                    if (totalClassesInLevel > 0) {
+                        let disciplinesInLevel = new Set();
+                        activeClasses.filter(c => c.levelId === niv.id).forEach(c => {
+                            (classDisciplines[c.name] || []).forEach(d => disciplinesInLevel.add(d.trim().toLowerCase()));
+                        });
+
+                        disciplinesInLevel.forEach(disc => {
+                            const teachersInDisc = teachersByDisc[disc] || [];
+                            if (teachersInDisc.length > 0) {
+                                const baseClasses = Math.floor(totalClassesInLevel / teachersInDisc.length);
+                                let remainder = totalClassesInLevel % teachersInDisc.length;
+
+                                teachersInDisc.forEach((t, idx) => {
+                                    const teacherKey = `${t.nom}_${t.prenom}_${t.discipline}`;
+                                    if (!preAffectations[teacherKey]) preAffectations[teacherKey] = {};
+                                    preAffectations[teacherKey][niv.id] = baseClasses + (idx < remainder ? 1 : 0);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
+            let teacherPoolUsage = {};
+            
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                if (!teacherAssignments[cls.name]) teacherAssignments[cls.name] = {};
+
+                discs.forEach(disc => {
+                    if (!teacherAssignments[cls.name][disc]) {
+                        const matchingTeachers = teachersData.filter(t => t.discipline.trim().toLowerCase() === disc.trim().toLowerCase());
+                        
+                        let assignedTeacherName = '';
+                        for (let t of matchingTeachers) {
+                            const teacherKey = `${t.nom}_${t.prenom}_${t.discipline}`;
+                            const maxAllowed = (preAffectations[teacherKey] && preAffectations[teacherKey][cls.levelId]) || 0;
+                            
+                            if (!teacherPoolUsage[teacherKey]) teacherPoolUsage[teacherKey] = 0;
+
+                            if (teacherPoolUsage[teacherKey] < maxAllowed) {
+                                assignedTeacherName = `${t.nom} ${t.prenom}`;
+                                teacherPoolUsage[teacherKey]++;
+                                break;
+                            }
+                        }
+
+                        if (!assignedTeacherName && matchingTeachers.length > 0) {
+                            assignedTeacherName = `${matchingTeachers[0].nom} ${matchingTeachers[0].prenom}`;
+                        }
+
+                        if (assignedTeacherName) {
+                            teacherAssignments[cls.name][disc] = assignedTeacherName;
+                        }
+                    }
+                });
+            });
+
+            let html = '';
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                html += `
+                    <div class="bg-gray-50 p-5 rounded-lg border border-gray-200">
+                        <h3 class="text-md font-bold text-blue-900 mb-4 border-b border-gray-200 pb-2">Classe : ${escapeHtml(cls.name)} <span class="text-xs font-normal text-gray-500">(${cls.levelLabel})</span></h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                `;
+
+                discs.forEach(disc => {
+                    const matchingTeachers = teachersData.filter(t => t.discipline.trim().toLowerCase() === disc.trim().toLowerCase());
+                    const currentSelectedTeacher = (teacherAssignments[cls.name] && teacherAssignments[cls.name][disc]) || '';
+
+                    html += `
+                        <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
+                            <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">${escapeHtml(disc)}</label>
+                            <select id="assign-${escapeHtml(cls.name)}-${escapeHtml(disc)}" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                <option value="">-- Choisir un enseignant --</option>
+                    `;
+
+                    matchingTeachers.forEach(t => {
+                        const teacherFullName = `${t.nom} ${t.prenom}`;
+                        const isSelected = currentSelectedTeacher === teacherFullName ? 'selected' : '';
+                        html += `<option value="${escapeHtml(teacherFullName)}" ${isSelected}>${escapeHtml(t.nom)} ${escapeHtml(t.prenom)}</option>`;
+                    });
+
+                    html += `
+                            </select>
+                            ${matchingTeachers.length === 0 ? '<p class="text-xs text-red-500 mt-1 italic">Aucun enseignant pour cette discipline</p>' : ''}
+                        </div>
+                    `;
+                });
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function saveTeacherAssignments() {
+            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const allClasses = getComputedClassList();
+            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+
+            let teacherAssignments = {};
+
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                teacherAssignments[cls.name] = {};
+                discs.forEach(disc => {
+                    const selectEl = document.getElementById(`assign-${cls.name}-${disc}`);
+                    if (selectEl && selectEl.value) {
+                        teacherAssignments[cls.name][disc] = selectEl.value;
+                    }
+                });
+            });
+
+            sessionStorage.setItem('classTeacherAssignments', JSON.stringify(teacherAssignments));
+            alert("Affectations des enseignants enregistrées temporairement !");
+        }
+
+        // Sécurisation basique contre les injections HTML
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Initialisation au chargement de la page avec proposition de charger une sauvegarde précédente
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.length > 0) {
+                if (confirm("Voulez-vous charger la sauvegarde précédente trouvée en session ?")) {
+                    // Les données sont déjà dans sessionStorage, on initialise simplement l'UI
+                }
+            }
+            initStructureForm();
+            const savedTeachers = sessionStorage.getItem('teachersData');
+            if (savedTeachers) {
+                teachersData = JSON.parse(savedTeachers);
+                renderTeachersTable();
+            }
+        });
+    </script>
+</body>
+</html>
