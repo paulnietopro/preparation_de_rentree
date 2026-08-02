@@ -40,13 +40,16 @@
             Dotation
         </button>
         <button onclick="switchTab('enseignant')" id="btn-enseignant" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
-            Enseignant
+            Liste des enseignants
         </button>
         <button onclick="switchTab('discipline')" id="btn-discipline" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
-            Discipline
+            Affectation des enseignements aux classes
         </button>
         <button onclick="switchTab('ventilation')" id="btn-ventilation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
-            Ventilation par discipline
+            Ventilation horaire par classe
+        </button>
+        <button onclick="switchTab('trmd')" id="btn-trmd" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            TRMD
         </button>
         <button onclick="switchTab('pre-affectation')" id="btn-pre-affectation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
             Pré Affectation des enseignants
@@ -105,7 +108,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-blue-900">Calcul de la dotation horaire (DGH)</h2>
-                        <p class="text-sm text-gray-600">Répartissez les heures pour la voie générale, technologique et l'ARE.</p>
+                        <p class="text-sm text-gray-600">Choisissez votre mode de calcul ou de saisie de la dotation.</p>
                     </div>
                     <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 flex items-center space-x-3 shadow-sm">
                         <span class="text-sm font-medium text-blue-900">DGH :</span>
@@ -113,78 +116,114 @@
                     </div>
                 </div>
 
-                <!-- BLOC 1 : VOIE GÉNÉRALE -->
-                <div class="space-y-4">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="text-md font-bold text-blue-900">1. Voie Générale et Supérieure</h3>
-                        <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
-                            Sous-total Voie Générale : <span id="subtotal-generale">0</span> h
-                        </div>
+                <!-- Choix du mode de dotation -->
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-blue-900 mb-1">Mode de détermination de la DGH :</label>
+                        <p class="text-xs text-gray-600">Choisissez si vous souhaitez détailler le calcul par structure ou saisir directement un montant global.</p>
                     </div>
-                    <div id="voie-generale-container" class="space-y-4">
-                        <!-- Généré en JS -->
-                    </div>
-                </div>
-
-                <!-- BLOC 2 : VOIE TECHNOLOGIQUE -->
-                <div class="space-y-4 pt-6 border-t border-gray-200">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="text-md font-bold text-blue-900">2. Voie Technologique</h3>
-                        <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
-                            Sous-total Voie Technologique : <span id="subtotal-techno">0</span> h
-                        </div>
-                    </div>
-                    <div id="voie-techno-container" class="space-y-6">
-                        <!-- Généré en JS -->
+                    <div>
+                        <select id="dotation-mode-select" onchange="toggleDotationMode()" class="border border-blue-300 rounded-md px-3 py-2 text-sm bg-white font-semibold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="explicit">Calcul explicite (Détaillé)</option>
+                            <option value="global">Saisie directe du montant DGH (HP + HSA)</option>
+                        </select>
                     </div>
                 </div>
 
-                <!-- BLOC 3 : ARE -->
-                <div class="space-y-4 pt-6 border-t border-gray-200">
-                    <div class="flex justify-between items-center border-b pb-2">
-                        <h3 class="text-md font-bold text-blue-900">3. ARE</h3>
-                        <div class="flex items-center space-x-4">
+                <!-- MODE 1 : SAISIE GLOBALE DGH (HP + HSA) -->
+                <div id="dotation-mode-global-container" class="space-y-4" style="display: none;">
+                    <h3 class="text-md font-bold text-blue-900 border-b pb-2">Saisie directe des moyens (HP et HSA)</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">HP (Heures Poste)</label>
+                            <input type="number" min="0" step="0.5" id="dgh-hp-input" value="0" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                            <label class="block text-xs font-semibold text-gray-700 mb-1">HSA (Heures Supplémentaires)</label>
+                            <input type="number" min="0" step="0.5" id="dgh-hsa-input" value="0" oninput="calculateDotationTotals()" class="w-full border border-gray-300 rounded px-3 py-2 text-sm font-bold focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-200 shadow-sm flex flex-col justify-center">
+                            <span class="text-xs font-semibold text-blue-900 mb-1">DGH Totale (HP + HSA)</span>
+                            <span id="dgh-global-display" class="text-xl font-bold text-blue-700">0 h</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MODE 2 : CALCUL EXPLICITE (DÉTAILLÉ ACTUEL) -->
+                <div id="dotation-mode-explicit-container" class="space-y-6">
+                    <!-- BLOC 1 : VOIE GÉNÉRALE -->
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-md font-bold text-blue-900">1. Voie Générale et Supérieure</h3>
                             <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
-                                Sous-total ARE : <span id="subtotal-are">0</span> h
+                                Sous-total Voie Générale : <span id="subtotal-generale">0</span> h
                             </div>
-                            <button onclick="addAreCustomRow()" class="text-xs bg-white border border-gray-300 hover:bg-gray-100 text-blue-800 font-semibold py-1.5 px-3 rounded shadow-sm transition-colors">+ Ajouter une ligne ARE</button>
+                        </div>
+                        <div id="voie-generale-container" class="space-y-4">
+                            <!-- Généré en JS -->
                         </div>
                     </div>
 
-                    <div class="space-y-3" id="are-container">
-                        <!-- Ligne UNSS -->
-                        <div class="bg-gray-50 p-3 rounded border border-gray-200 flex items-center justify-between">
-                            <span class="text-sm font-semibold text-gray-700">UNSS</span>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" min="0" step="0.5" id="are-unss-input" value="0" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold">
-                                <span class="text-xs text-gray-500">h</span>
+                    <!-- BLOC 2 : VOIE TECHNOLOGIQUE -->
+                    <div class="space-y-4 pt-6 border-t border-gray-200">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-md font-bold text-blue-900">2. Voie Technologique</h3>
+                            <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                                Sous-total Voie Technologique : <span id="subtotal-techno">0</span> h
                             </div>
                         </div>
-
-                        <!-- Ligne Pondération 1re et Terminale -->
-                        <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
-                            <div>
-                                <span class="text-sm font-semibold text-blue-900">Pondération 1re et Terminale</span>
-                                <p class="text-[11px] text-gray-500">Calcul auto : <span id="are-pond-1t-calc">0</span> h (modifiable)</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <input type="number" step="0.5" id="are-pond-1t-input" value="0" oninput="onPond1tUserChange()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold text-blue-900">
-                                <span class="text-xs text-gray-500">h</span>
-                            </div>
-                        </div>
-
-                        <!-- Ligne Pondération BTS -->
-                        <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
-                            <div>
-                                <span class="text-sm font-semibold text-blue-900">Pondération BTS</span>
-                                <p class="text-[11px] text-gray-500">0,25 × Heures BTS</p>
-                            </div>
-                            <div class="text-sm font-bold text-blue-800" id="are-pond-bts-display">0 h</div>
-                        </div>
-
-                        <!-- Conteneur lignes personnalisées ARE -->
-                        <div id="are-custom-container" class="space-y-2">
+                        <div id="voie-techno-container" class="space-y-6">
                             <!-- Généré en JS -->
+                        </div>
+                    </div>
+
+                    <!-- BLOC 3 : ARE -->
+                    <div class="space-y-4 pt-6 border-t border-gray-200">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="text-md font-bold text-blue-900">3. ARE</h3>
+                            <div class="flex items-center space-x-4">
+                                <div class="text-sm font-bold text-blue-800 bg-blue-50 px-3 py-1 rounded border border-blue-200">
+                                    Sous-total ARE : <span id="subtotal-are">0</span> h
+                                </div>
+                                <button onclick="addAreCustomRow()" class="text-xs bg-white border border-gray-300 hover:bg-gray-100 text-blue-800 font-semibold py-1.5 px-3 rounded shadow-sm transition-colors">+ Ajouter une ligne ARE</button>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3" id="are-container">
+                            <!-- Ligne UNSS -->
+                            <div class="bg-gray-50 p-3 rounded border border-gray-200 flex items-center justify-between">
+                                <span class="text-sm font-semibold text-gray-700">UNSS</span>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" min="0" step="0.5" id="are-unss-input" value="0" oninput="calculateDotationTotals()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold">
+                                    <span class="text-xs text-gray-500">h</span>
+                                </div>
+                            </div>
+
+                            <!-- Ligne Pondération 1re et Terminale -->
+                            <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm font-semibold text-blue-900">Pondération 1re et Terminale</span>
+                                    <p class="text-[11px] text-gray-500">Calcul auto : <span id="are-pond-1t-calc">0</span> h (modifiable)</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="number" step="0.5" id="are-pond-1t-input" value="0" oninput="onPond1tUserChange()" class="w-28 border border-gray-300 rounded px-2 py-1 text-sm text-right focus:outline-none focus:ring-1 focus:ring-blue-500 font-bold text-blue-900">
+                                    <span class="text-xs text-gray-500">h</span>
+                                </div>
+                            </div>
+
+                            <!-- Ligne Pondération BTS -->
+                            <div class="bg-blue-50/50 p-3 rounded border border-blue-100 flex items-center justify-between">
+                                <div>
+                                    <span class="text-sm font-semibold text-blue-900">Pondération BTS</span>
+                                    <p class="text-[11px] text-gray-500">0,25 × Heures BTS</p>
+                                </div>
+                                <div class="text-sm font-bold text-blue-800" id="are-pond-bts-display">0 h</div>
+                            </div>
+
+                            <!-- Conteneur lignes personnalisées ARE -->
+                            <div id="are-custom-container" class="space-y-2">
+                                <!-- Généré en JS -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -197,7 +236,7 @@
             </div>
         </section>
 
-        <!-- ONGLET 3 : ENSEIGNANT -->
+        <!-- ONGLET 3 : LISTE DES ENSEIGNANTS -->
         <section id="tab-enseignant" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h2 class="text-lg font-semibold mb-4 text-blue-900">Importation de la liste des enseignants</h2>
@@ -232,7 +271,7 @@
             </div>
         </section>
 
-        <!-- ONGLET 4 : DISCIPLINE -->
+        <!-- ONGLET 4 : AFFECTATION DES ENSEIGNEMENTS AUX CLASSES -->
         <section id="tab-discipline" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h2 class="text-lg font-semibold mb-2 text-blue-900">Affectation des disciplines par classe</h2>
@@ -242,7 +281,7 @@
                 <div class="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
                     <h3 class="text-sm font-semibold text-gray-700 mb-3">1. Choisissez la ou les discipline(s) à affecter :</h3>
                     <div id="disciplines-checkbox-container" class="flex flex-wrap gap-4">
-                        <span class="text-sm text-gray-400 italic">Veuillez d'abord charger un fichier enseignant.</span>
+                        <span class="text-sm text-gray-400 italic">Veuillez d'abord charger un fichier dans "Liste des enseignants".</span>
                     </div>
                 </div>
 
@@ -284,7 +323,7 @@
             </div>
         </section>
 
-        <!-- ONGLET 5 : VENTILATION PAR DISCIPLINE -->
+        <!-- ONGLET 5 : VENTILATION HORAIRE PAR CLASSE -->
         <section id="tab-ventilation" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h2 class="text-lg font-semibold mb-2 text-blue-900">Ventilation des heures par discipline et par classe</h2>
@@ -321,7 +360,7 @@
 
                 <!-- Tableau détaillé de ventilation -->
                 <div id="ventilation-container" class="space-y-6">
-                    <span class="text-sm text-gray-400 italic">Veuillez d'abord affecter des disciplines aux classes dans l'onglet "Discipline".</span>
+                    <span class="text-sm text-gray-400 italic">Veuillez d'abord affecter des disciplines aux classes dans l'onglet "Affectation des enseignements aux classes".</span>
                 </div>
 
                 <div class="mt-6 flex justify-end">
@@ -332,7 +371,38 @@
             </div>
         </section>
 
-        <!-- ONGLET 6 : PRE AFFECTATION DES ENSEIGNANTS -->
+        <!-- ONGLET 6 : TRMD -->
+        <section id="tab-trmd" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-900">Tableau de Répartition des Moyens par Discipline</h2>
+                        <p class="text-sm text-gray-600">Somme des heures attribuées par discipline d'après la ventilation horaire par classe.</p>
+                    </div>
+                    <!-- Option Norwegien (DGH - Total Général) -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 flex items-center space-x-3 shadow-sm">
+                        <span class="text-sm font-medium text-amber-900" title="Différence entre la DGH et le total général">Norwegien :</span>
+                        <span id="norwegian-display" class="text-lg font-bold text-amber-700">0 h</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                                <th class="py-3 px-4 border-b">Discipline</th>
+                                <th class="py-3 px-4 border-b text-right">Volume horaire total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trmd-tbody" class="divide-y divide-gray-200 text-sm">
+                            <!-- Généré dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 7 : PRE AFFECTATION DES ENSEIGNANTS -->
         <section id="tab-pre-affectation" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
@@ -359,7 +429,7 @@
                         </thead>
                         <tbody id="pre-affectation-tbody" class="divide-y divide-gray-200 text-sm">
                             <tr>
-                                <td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</td>
+                                <td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Liste des enseignants".</td>
                             </tr>
                         </tbody>
                     </table>
@@ -373,7 +443,7 @@
             </div>
         </section>
 
-        <!-- ONGLET 7 : AFFECTATION DES ENSEIGNANTS -->
+        <!-- ONGLET 8 : AFFECTATION DES ENSEIGNANTS -->
         <section id="tab-affectation" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
                 <h2 class="text-lg font-semibold mb-2 text-blue-900">Affectation des enseignants par classe</h2>
@@ -414,6 +484,8 @@
                 initDisciplineTab();
             } else if (tabName === 'ventilation') {
                 initVentilationTab();
+            } else if (tabName === 'trmd') {
+                initTrmdTab();
             } else if (tabName === 'pre-affectation') {
                 initPreAffectationTab();
             } else if (tabName === 'affectation') {
@@ -721,7 +793,15 @@
             const structureData = JSON.parse(sessionStorage.getItem('schoolStructureData')) || {};
             const counts = structureData.counts || {};
             const classSeries = structureData.classSeries || {};
-            const dotationData = JSON.parse(sessionStorage.getItem('dotationDataNew')) || { generale: {}, techno: {}, are: { unss: 0, pond1tCustom: null, custom: [] } };
+            const dotationData = JSON.parse(sessionStorage.getItem('dotationDataNew')) || { mode: 'explicit', globalHP: 0, globalHSA: 0, generale: {}, techno: {}, are: { unss: 0, pond1tCustom: null, custom: [] } };
+
+            // Gérer le mode de sélection
+            const modeSelect = document.getElementById('dotation-mode-select');
+            modeSelect.value = dotationData.mode || 'explicit';
+            toggleDotationMode();
+
+            document.getElementById('dgh-hp-input').value = dotationData.globalHP !== undefined ? dotationData.globalHP : 0;
+            document.getElementById('dgh-hsa-input').value = dotationData.globalHSA !== undefined ? dotationData.globalHSA : 0;
 
             userModifiedPond1t = (dotationData.are && dotationData.are.pond1tCustom !== undefined && dotationData.are.pond1tCustom !== null);
 
@@ -884,6 +964,21 @@
             }
         }
 
+        function toggleDotationMode() {
+            const mode = document.getElementById('dotation-mode-select').value;
+            const globalCont = document.getElementById('dotation-mode-global-container');
+            const explicitCont = document.getElementById('dotation-mode-explicit-container');
+
+            if (mode === 'global') {
+                globalCont.style.display = 'block';
+                explicitCont.style.display = 'none';
+            } else {
+                globalCont.style.display = 'none';
+                explicitCont.style.display = 'block';
+            }
+            calculateDotationTotals();
+        }
+
         function onPond1tUserChange() {
             userModifiedPond1t = true;
             calculateDotationTotals();
@@ -923,141 +1018,158 @@
         }
 
         function calculateDotationTotals() {
-            let totalGenerale = 0;
-            let totalTechno = 0;
-            let totalAre = 0;
+            const mode = document.getElementById('dotation-mode-select').value;
+            let globalDgh = 0;
 
-            // 1. Calcul Voie Générale
-            niveauxGeneraux.forEach(niv => {
-                const block = document.querySelector(`.gen-level-block[data-gen-id="${niv.id}"]`);
-                if (!block) return;
+            if (mode === 'global') {
+                const hp = parseFloat(document.getElementById('dgh-hp-input').value) || 0;
+                const hsa = parseFloat(document.getElementById('dgh-hsa-input').value) || 0;
+                globalDgh = hp + hsa;
+                document.getElementById('dgh-global-display').textContent = `${Math.round(globalDgh * 100) / 100} h`;
+            } else {
+                let totalGenerale = 0;
+                let totalTechno = 0;
+                let totalAre = 0;
 
-                const nbClasses = parseFloat(block.querySelector('.gen-classes-multiplier').value) || 0;
-                const baseVal = parseFloat(block.querySelector('.gen-base-input').value) || 0;
-                const compVal = parseFloat(block.querySelector('.gen-comp-input').value) || 0;
+                // 1. Calcul Voie Générale
+                niveauxGeneraux.forEach(niv => {
+                    const block = document.querySelector(`.gen-level-block[data-gen-id="${niv.id}"]`);
+                    if (!block) return;
 
-                let subNivTotal = (baseVal + compVal) * nbClasses;
-
-                block.querySelectorAll('.gen-custom-item').forEach(item => {
-                    const hVal = parseFloat(item.querySelector('.gen-c-hours').value) || 0;
-                    const multVal = parseFloat(item.querySelector('.gen-c-mult').value) || 0;
-                    subNivTotal += hVal * multVal;
-                });
-
-                block.querySelector(`.gen-subtotal-${niv.id}`).textContent = Math.round(subNivTotal * 100) / 100;
-                totalGenerale += subNivTotal;
-            });
-
-            // 2. Calcul Voie Technologique
-            const technoLevelBlocks = document.querySelectorAll('.techno-level-block');
-            technoLevelBlocks.forEach(block => {
-                const oblInput = block.querySelector('.techno-obligatoires-input');
-                const nbClassesTech = parseFloat(oblInput.dataset.classes) || 0;
-                const oblVal = parseFloat(oblInput.value) || 0;
-
-                let subLevelTotal = oblVal * nbClassesTech;
-
-                block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
-                    const serie = subBlock.dataset.serie;
-                    const facteur = (serie === 'STMG') ? 8 : (serie === 'STI2D' ? 14 : 10);
-                    const speInput = subBlock.querySelector('.techno-spe-input');
-                    const serieClasses = parseFloat(speInput.dataset.serieClasses) || 0;
-                    const speVal = parseFloat(speInput.value) || 0;
-                    const effVal = parseFloat(subBlock.querySelector('.techno-eff-input').value) || 0;
-
-                    const rawReduit = (effVal / 29) * facteur;
-                    const calcReduit = Math.ceil(rawReduit * 2) / 2;
-                    subBlock.querySelector('.techno-ger-display').value = `${calcReduit} h`;
-
-                    subLevelTotal += (speVal * serieClasses) + calcReduit;
-                });
-
-                block.querySelector('.techno-level-subtotal').textContent = Math.round(subLevelTotal * 100) / 100;
-                totalTechno += subLevelTotal;
-            });
-
-            // 3. Calcul ARE
-            let heuresBaseEtCustom1T = 0;
-            let nbClasses1T = 0;
-
-            ['1re', 'Tale'].forEach(nivId => {
-                const block = document.querySelector(`.gen-level-block[data-gen-id="${nivId}"]`);
-                if (block) {
                     const nbClasses = parseFloat(block.querySelector('.gen-classes-multiplier').value) || 0;
                     const baseVal = parseFloat(block.querySelector('.gen-base-input').value) || 0;
-                    heuresBaseEtCustom1T += baseVal * nbClasses;
-                    nbClasses1T += nbClasses;
+                    const compVal = parseFloat(block.querySelector('.gen-comp-input').value) || 0;
+
+                    let subNivTotal = (baseVal + compVal) * nbClasses;
 
                     block.querySelectorAll('.gen-custom-item').forEach(item => {
-                        heuresBaseEtCustom1T += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
+                        const hVal = parseFloat(item.querySelector('.gen-c-hours').value) || 0;
+                        const multVal = parseFloat(item.querySelector('.gen-c-mult').value) || 0;
+                        subNivTotal += hVal * multVal;
                     });
-                }
-            });
 
-            niveauxTechnologiques.forEach(niv => {
-                const block = document.querySelector(`.techno-level-block[data-tech-level="${niv.id}"]`);
-                if (block) {
+                    block.querySelector(`.gen-subtotal-${niv.id}`).textContent = Math.round(subNivTotal * 100) / 100;
+                    totalGenerale += subNivTotal;
+                });
+
+                // 2. Calcul Voie Technologique
+                const technoLevelBlocks = document.querySelectorAll('.techno-level-block');
+                technoLevelBlocks.forEach(block => {
                     const oblInput = block.querySelector('.techno-obligatoires-input');
                     const nbClassesTech = parseFloat(oblInput.dataset.classes) || 0;
-                    heuresBaseEtCustom1T += (parseFloat(oblInput.value) || 0) * nbClassesTech;
-                    nbClasses1T += nbClassesTech;
+                    const oblVal = parseFloat(oblInput.value) || 0;
+
+                    let subLevelTotal = oblVal * nbClassesTech;
 
                     block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
+                        const serie = subBlock.dataset.serie;
+                        const facteur = (serie === 'STMG') ? 8 : (serie === 'STI2D' ? 14 : 10);
                         const speInput = subBlock.querySelector('.techno-spe-input');
                         const serieClasses = parseFloat(speInput.dataset.serieClasses) || 0;
-                        heuresBaseEtCustom1T += (parseFloat(speInput.value) || 0) * serieClasses;
+                        const speVal = parseFloat(speInput.value) || 0;
+                        const effVal = parseFloat(subBlock.querySelector('.techno-eff-input').value) || 0;
+
+                        const rawReduit = (effVal / 29) * facteur;
+                        const calcReduit = Math.ceil(rawReduit * 2) / 2;
+                        subBlock.querySelector('.techno-ger-display').value = `${calcReduit} h`;
+
+                        subLevelTotal += (speVal * serieClasses) + calcReduit;
+                    });
+
+                    block.querySelector('.techno-level-subtotal').textContent = Math.round(subLevelTotal * 100) / 100;
+                    totalTechno += subLevelTotal;
+                });
+
+                // 3. Calcul ARE
+                let heuresBaseEtCustom1T = 0;
+                let nbClasses1T = 0;
+
+                ['1re', 'Tale'].forEach(nivId => {
+                    const block = document.querySelector(`.gen-level-block[data-gen-id="${nivId}"]`);
+                    if (block) {
+                        const nbClasses = parseFloat(block.querySelector('.gen-classes-multiplier').value) || 0;
+                        const baseVal = parseFloat(block.querySelector('.gen-base-input').value) || 0;
+                        heuresBaseEtCustom1T += baseVal * nbClasses;
+                        nbClasses1T += nbClasses;
+
+                        block.querySelectorAll('.gen-custom-item').forEach(item => {
+                            heuresBaseEtCustom1T += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
+                        });
+                    }
+                });
+
+                niveauxTechnologiques.forEach(niv => {
+                    const block = document.querySelector(`.techno-level-block[data-tech-level="${niv.id}"]`);
+                    if (block) {
+                        const oblInput = block.querySelector('.techno-obligatoires-input');
+                        const nbClassesTech = parseFloat(oblInput.dataset.classes) || 0;
+                        heuresBaseEtCustom1T += (parseFloat(oblInput.value) || 0) * nbClassesTech;
+                        nbClasses1T += nbClassesTech;
+
+                        block.querySelectorAll('.techno-serie-subblock').forEach(subBlock => {
+                            const speInput = subBlock.querySelector('.techno-spe-input');
+                            const serieClasses = parseFloat(speInput.dataset.serieClasses) || 0;
+                            heuresBaseEtCustom1T += (parseFloat(speInput.value) || 0) * serieClasses;
+                        });
+                    }
+                });
+
+                let calcPond1T = (0.1 * heuresBaseEtCustom1T) - (0.1 * 2 * nbClasses1T);
+                calcPond1T = Math.round(calcPond1T * 100) / 100;
+                document.getElementById('are-pond-1t-calc').textContent = calcPond1T;
+
+                const pond1tInput = document.getElementById('are-pond-1t-input');
+                if (!userModifiedPond1t) {
+                    pond1tInput.value = calcPond1T;
+                }
+                let pond1TVal = parseFloat(pond1tInput.value) || 0;
+
+                // Pondération BTS (Voie Générale 'BTS')
+                let heuresBts = 0;
+                const btsBlock = document.querySelector(`.gen-level-block[data-gen-id="BTS"]`);
+                if (btsBlock) {
+                    const nbClasses = parseFloat(btsBlock.querySelector('.gen-classes-multiplier').value) || 0;
+                    const baseVal = parseFloat(btsBlock.querySelector('.gen-base-input').value) || 0;
+                    const compVal = parseFloat(btsBlock.querySelector('.gen-comp-input').value) || 0;
+                    heuresBts += (baseVal + compVal) * nbClasses;
+
+                    btsBlock.querySelectorAll('.gen-custom-item').forEach(item => {
+                        heuresBts += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
                     });
                 }
-            });
 
-            let calcPond1T = (0.1 * heuresBaseEtCustom1T) - (0.1 * 2 * nbClasses1T);
-            calcPond1T = Math.round(calcPond1T * 100) / 100;
-            document.getElementById('are-pond-1t-calc').textContent = calcPond1T;
+                let pondBts = 0.25 * heuresBts;
+                pondBts = Math.round(pondBts * 100) / 100;
+                document.getElementById('are-pond-bts-display').textContent = `${pondBts} h`;
 
-            const pond1tInput = document.getElementById('are-pond-1t-input');
-            if (!userModifiedPond1t) {
-                pond1tInput.value = calcPond1T;
-            }
-            let pond1TVal = parseFloat(pond1tInput.value) || 0;
+                // UNSS et lignes personnalisées ARE
+                const unssVal = parseFloat(document.getElementById('are-unss-input').value) || 0;
+                totalAre += unssVal + pond1TVal + pondBts;
 
-            // Pondération BTS (Voie Générale 'BTS')
-            let heuresBts = 0;
-            const btsBlock = document.querySelector(`.gen-level-block[data-gen-id="BTS"]`);
-            if (btsBlock) {
-                const nbClasses = parseFloat(btsBlock.querySelector('.gen-classes-multiplier').value) || 0;
-                const baseVal = parseFloat(btsBlock.querySelector('.gen-base-input').value) || 0;
-                const compVal = parseFloat(btsBlock.querySelector('.gen-comp-input').value) || 0;
-                heuresBts += (baseVal + compVal) * nbClasses;
-
-                btsBlock.querySelectorAll('.gen-custom-item').forEach(item => {
-                    heuresBts += (parseFloat(item.querySelector('.gen-c-hours').value) || 0) * (parseFloat(item.querySelector('.gen-c-mult').value) || 0);
+                document.querySelectorAll('.are-custom-item').forEach(item => {
+                    totalAre += parseFloat(item.querySelector('.are-c-hours').value) || 0;
                 });
+
+                document.getElementById('subtotal-are').textContent = Math.round(totalAre * 100) / 100;
+
+                document.getElementById('subtotal-generale').textContent = Math.round(totalGenerale * 100) / 100;
+                document.getElementById('subtotal-techno').textContent = Math.round(totalTechno * 100) / 100;
+
+                globalDgh = totalGenerale + totalTechno + totalAre;
             }
 
-            let pondBts = 0.25 * heuresBts;
-            pondBts = Math.round(pondBts * 100) / 100;
-            document.getElementById('are-pond-bts-display').textContent = `${pondBts} h`;
-
-            // UNSS et lignes personnalisées ARE
-            const unssVal = parseFloat(document.getElementById('are-unss-input').value) || 0;
-            totalAre += unssVal + pond1TVal + pondBts;
-
-            document.querySelectorAll('.are-custom-item').forEach(item => {
-                totalAre += parseFloat(item.querySelector('.are-c-hours').value) || 0;
-            });
-
-            document.getElementById('subtotal-are').textContent = Math.round(totalAre * 100) / 100;
-
-            // Affichage des sous-totaux et total global
-            document.getElementById('subtotal-generale').textContent = Math.round(totalGenerale * 100) / 100;
-            document.getElementById('subtotal-techno').textContent = Math.round(totalTechno * 100) / 100;
-
-            let globalDgh = totalGenerale + totalTechno + totalAre;
             document.getElementById('global-dotation-total').textContent = `${Math.round(globalDgh * 100) / 100} h`;
+
+            // Mettre à jour le Norwegien dans le TRMD en temps réel si l'onglet est actif ou mis en cache
+            updateNorwegianDisplay(globalDgh);
         }
 
         function saveDotation() {
-            const dotationData = { generale: {}, techno: {}, are: {} };
+            const mode = document.getElementById('dotation-mode-select').value;
+            const hp = parseFloat(document.getElementById('dgh-hp-input').value) || 0;
+            const hsa = parseFloat(document.getElementById('dgh-hsa-input').value) || 0;
+
+            const dotationData = { mode: mode, globalHP: hp, globalHSA: hsa, generale: {}, techno: {}, are: {} };
 
             niveauxGeneraux.forEach(niv => {
                 const block = document.querySelector(`.gen-level-block[data-gen-id="${niv.id}"]`);
@@ -1155,7 +1267,7 @@
             const uniqueDisciplines = [...new Set(teachersData.map(t => t.discipline).filter(d => d && d.trim() !== ''))].sort();
 
             if (uniqueDisciplines.length === 0) {
-                discContainer.innerHTML = `<span class="text-sm text-gray-400 italic">Aucune discipline trouvée. Veuillez d'abord charger un fichier enseignant.</span>`;
+                discContainer.innerHTML = `<span class="text-sm text-gray-400 italic">Aucune discipline trouvée. Veuillez d'abord charger un fichier dans l'onglet "Liste des enseignants".</span>`;
             } else {
                 discContainer.innerHTML = uniqueDisciplines.map((disc, idx) => `
                     <label class="inline-flex items-center space-x-2 bg-white px-3 py-1.5 rounded border border-gray-200 shadow-sm cursor-pointer hover:bg-gray-50">
@@ -1306,7 +1418,7 @@
             recapContainer.innerHTML = html;
         }
 
-        // --- GESTION DE L'ONGLET VENTILATION PAR DISCIPLINE ---
+        // --- GESTION DE L'ONGLET VENTILATION HORAIRE PAR CLASSE ---
         function initVentilationTab() {
             const container = document.getElementById('ventilation-container');
             const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
@@ -1337,7 +1449,7 @@
             targetSelect.innerHTML = targetHtml;
 
             if (activeClasses.length === 0) {
-                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Discipline".</p>`;
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Affectation des enseignements aux classes".</p>`;
                 return;
             }
 
@@ -1356,7 +1468,7 @@
                         <div class="bg-white p-3 rounded border border-gray-200 shadow-sm">
                             <label class="block text-xs font-semibold text-gray-500 uppercase mb-1">${escapeHtml(disc)}</label>
                             <div class="flex items-center space-x-2">
-                                <input type="number" min="0" step="0.5" id="vent-${escapeHtml(cls.name)}-${escapeHtml(disc)}" value="${hoursVal}" placeholder="0" class="vent-input w-full border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500" data-class="${escapeHtml(cls.name)}" data-level="${cls.levelId}" data-disc="${escapeHtml(disc)}">
+                                <input type="number" min="0" step="0.5" id="vent-${escapeHtml(cls.name)}-${escapeHtml(disc)}" value="${hoursVal}" placeholder="0" class="vent-input w-full border border-gray-300 rounded px-2 py-1.5 text-sm text-gray-800 focus:outline-none focus:ring-1 focus:ring-blue-500" data-class="${escapeHtml(cls.name)}" data-level="${cls.levelId}" data-disc="${escapeHtml(disc)}" oninput="saveVentilationsQuietly()">
                                 <span class="text-xs text-gray-500">h</span>
                             </div>
                         </div>
@@ -1370,6 +1482,27 @@
             });
 
             container.innerHTML = html;
+        }
+
+        function saveVentilationsQuietly() {
+            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const allClasses = getComputedClassList();
+            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+
+            let ventilations = {};
+
+            activeClasses.forEach(cls => {
+                const discs = classDisciplines[cls.name];
+                ventilations[cls.name] = {};
+                discs.forEach(disc => {
+                    const inputEl = document.getElementById(`vent-${cls.name}-${disc}`);
+                    if (inputEl && inputEl.value !== '') {
+                        ventilations[cls.name][disc] = parseFloat(inputEl.value) || 0;
+                    }
+                });
+            });
+
+            sessionStorage.setItem('classVentilationHours', JSON.stringify(ventilations));
         }
 
         function applyBulkVentilation() {
@@ -1401,29 +1534,94 @@
                 }
             });
 
-            alert(`Ventilation de ${hoursVal}h appliquée à ${countApplied} classe(s) pour la discipline "${selectedDisc}". Pensez à enregistrer.`);
+            saveVentilationsQuietly();
+            alert(`Ventilation de ${hoursVal}h appliquée à ${countApplied} classe(s) pour la discipline "${selectedDisc}".`);
         }
 
         function saveVentilations() {
-            const classDisciplines = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
-            const allClasses = getComputedClassList();
-            const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
+            saveVentilationsQuietly();
+            alert("Ventilation des heures enregistrée temporairement !");
+        }
 
-            let ventilations = {};
+        // --- GESTION DE L'ONGLET TRMD ---
+        function initTrmdTab() {
+            const tbody = document.getElementById('trmd-tbody');
+            let uniqueDiscs = [...new Set(teachersData.map(t => t.discipline).filter(d => d && d.trim() !== ''))].sort();
+            
+            const ventilations = JSON.parse(sessionStorage.getItem('classVentilationHours')) || {};
+            Object.values(ventilations).forEach(classMap => {
+                Object.keys(classMap).forEach(disc => {
+                    if (!uniqueDiscs.includes(disc)) uniqueDiscs.push(disc);
+                });
+            });
+            uniqueDiscs.sort();
 
-            activeClasses.forEach(cls => {
-                const discs = classDisciplines[cls.name];
-                ventilations[cls.name] = {};
-                discs.forEach(disc => {
-                    const inputEl = document.getElementById(`vent-${cls.name}-${disc}`);
-                    if (inputEl && inputEl.value !== '') {
-                        ventilations[cls.name][disc] = parseFloat(inputEl.value) || 0;
+            if (uniqueDiscs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucune discipline trouvée. Veuillez charger une liste d'enseignants ou ventiler des heures.</td></tr>`;
+                updateNorwegianDisplay(0);
+                return;
+            }
+
+            let totalsByDisc = {};
+            uniqueDiscs.forEach(d => totalsByDisc[d] = 0);
+
+            Object.values(ventilations).forEach(classMap => {
+                Object.keys(classMap).forEach(disc => {
+                    if (totalsByDisc[disc] !== undefined) {
+                        totalsByDisc[disc] += parseFloat(classMap[disc]) || 0;
                     }
                 });
             });
 
-            sessionStorage.setItem('classVentilationHours', JSON.stringify(ventilations));
-            alert("Ventilation des heures enregistrée temporairement !");
+            let html = '';
+            let totalGeneralTrmd = 0;
+            uniqueDiscs.forEach(disc => {
+                let vol = totalsByDisc[disc];
+                totalGeneralTrmd += vol;
+                html += `
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-3 px-4 font-semibold text-blue-900">${escapeHtml(disc)}</td>
+                        <td class="py-3 px-4 text-right font-bold text-gray-800">${Math.round(vol * 100) / 100} h</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                <tr class="bg-blue-50 font-bold text-blue-900" id="trmd-total-row" data-total="${totalGeneralTrmd}">
+                    <td class="py-3 px-4">TOTAL GÉNÉRAL</td>
+                    <td class="py-3 px-4 text-right">${Math.round(totalGeneralTrmd * 100) / 100} h</td>
+                </tr>
+            `;
+
+            tbody.innerHTML = html;
+
+            // Calculer la DGH actuelle pour le Norwegien
+            calculateDotationTotals();
+        }
+
+        function updateNorwegianDisplay(totalGeneral) {
+            // Récupérer la DGH globale actuelle
+            const dghEl = document.getElementById('global-dotation-total');
+            let dghVal = 0;
+            if (dghEl) {
+                dghVal = parseFloat(dghEl.textContent) || 0;
+            }
+
+            const trmdRow = document.getElementById('trmd-total-row');
+            let currentTotal = trmdRow ? parseFloat(trmdRow.dataset.total) || 0 : totalGeneral;
+
+            let norwegian = Math.round((dghVal - currentTotal) * 100) / 100;
+            const norwegianDisplay = document.getElementById('norwegian-display');
+            if (norwegianDisplay) {
+                norwegianDisplay.textContent = `${norwegian} h`;
+                if (norwegian < 0) {
+                    norwegianDisplay.className = "text-lg font-bold text-red-600";
+                } else if (norwegian > 0) {
+                    norwegianDisplay.className = "text-lg font-bold text-emerald-600";
+                } else {
+                    norwegianDisplay.className = "text-lg font-bold text-amber-700";
+                }
+            }
         }
 
         // --- GESTION DE L'ONGLET PRE AFFECTATION DES ENSEIGNANTS ---
@@ -1448,7 +1646,7 @@
             const selectedFilterDisc = document.getElementById('filter-pre-disc').value;
 
             if (teachersData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="2" class="py-4 px-4 text-center text-gray-400">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Liste des enseignants".</td></tr>`;
                 return;
             }
 
@@ -1591,12 +1789,12 @@
             const activeClasses = allClasses.filter(cls => classDisciplines[cls.name] && classDisciplines[cls.name].length > 0);
 
             if (activeClasses.length === 0) {
-                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Discipline".</p>`;
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucune discipline n'a encore été affectée aux classes dans l'onglet "Affectation des enseignements aux classes".</p>`;
                 return;
             }
 
             if (teachersData.length === 0) {
-                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Enseignant".</p>`;
+                container.innerHTML = `<p class="text-sm text-gray-400 italic">Aucun enseignant chargé. Veuillez importer un fichier dans l'onglet "Liste des enseignants".</p>`;
                 return;
             }
 
