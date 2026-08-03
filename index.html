@@ -56,11 +56,14 @@
         <button onclick="switchTab('ventilation')" id="btn-ventilation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
             Ventilation horaire par classe
         </button>
+        <button onclick="switchTab('affectation')" id="btn-affectation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Affectation des enseignants
+        </button>
         <button onclick="switchTab('trmd')" id="btn-trmd" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
             TRMD
         </button>
-        <button onclick="switchTab('affectation')" id="btn-affectation" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
-            Affectation des enseignants
+        <button onclick="switchTab('services')" id="btn-services" class="py-4 px-2 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none transition-colors whitespace-nowrap">
+            Services des enseignants
         </button>
     </nav>
 
@@ -409,7 +412,7 @@
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b gap-4">
                     <div>
                         <h2 class="text-lg font-semibold text-blue-900">Groupes particuliers</h2>
-                        <p class="text-sm text-gray-600">Créez des groupes sur-mesure, associez-leur une discipline et une quotité horaire.</p>
+                        <p class="text-sm text-gray-600">Créez des groupes sur-mesure, associez-leur une discipline, une quotité horaire et une pondération.</p>
                     </div>
                     <div class="flex items-center space-x-3">
                         <div class="bg-indigo-50 border border-indigo-200 rounded-lg px-4 py-2 flex items-center space-x-2 shadow-sm">
@@ -491,37 +494,6 @@
             </div>
         </section>
 
-        <!-- ONGLET TRMD -->
-        <section id="tab-trmd" class="tab-content space-y-6">
-            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-4">
-                    <div>
-                        <h2 class="text-lg font-semibold text-blue-900">Tableau de Répartition des Moyens par Discipline (TRMD)</h2>
-                        <p class="text-sm text-gray-600">Liste de toutes les disciplines issues de la liste des enseignants et volumes horaires agrégés.</p>
-                    </div>
-                    <!-- Compteur Norwegien -->
-                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 flex items-center space-x-3 shadow-sm">
-                        <span class="text-sm font-medium text-amber-900" title="Différence entre la DGH et le total général du TRMD">Norwegien :</span>
-                        <span id="norwegian-display" class="text-lg font-bold text-amber-700">0 h</span>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
-                                <th class="py-3 px-4 border-b">Discipline</th>
-                                <th class="py-3 px-4 border-b text-right">Volume horaire total</th>
-                            </tr>
-                        </thead>
-                        <tbody id="trmd-tbody" class="divide-y divide-gray-200 text-sm">
-                            <!-- Généré dynamiquement -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
         <!-- ONGLET : AFFECTATION DES ENSEIGNANTS PAR DISCIPLINE -->
         <section id="tab-affectation" class="tab-content space-y-6">
             <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
@@ -553,6 +525,58 @@
                     <button onclick="saveTeacherAssignmentsByDisc()" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md shadow-sm transition-colors">
                         Enregistrer les affectations
                     </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET TRMD -->
+        <section id="tab-trmd" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-4">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-900">Tableau de Répartition des Moyens par Discipline (TRMD)</h2>
+                        <p class="text-sm text-gray-600">Liste de toutes les disciplines issues de la liste des enseignants et volumes horaires agrégés.</p>
+                    </div>
+                    <!-- Compteur Norwegien -->
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg px-4 py-2 flex items-center space-x-3 shadow-sm">
+                        <span class="text-sm font-medium text-amber-900" title="Différence entre la DGH et le total général du TRMD">Norwegien :</span>
+                        <span id="norwegian-display" class="text-lg font-bold text-amber-700">0 h</span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 uppercase text-xs tracking-wider">
+                                <th class="py-3 px-4 border-b">Discipline</th>
+                                <th class="py-3 px-4 border-b text-right">Volume horaire total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trmd-tbody" class="divide-y divide-gray-200 text-sm">
+                            <!-- Généré dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET : SERVICES DES ENSEIGNANTS -->
+        <section id="tab-services" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-lg shadow-sm border border-gray-200 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b gap-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-blue-900">Synthèse des services des enseignants</h2>
+                        <p class="text-sm text-gray-600">Consultez la liste des services d'une discipline par ordre alphabétique.</p>
+                    </div>
+                    <div class="w-full sm:w-64">
+                        <select id="services-disc-select" onchange="renderTeacherServicesTab()" class="w-full border border-blue-300 rounded px-3 py-1.5 text-sm bg-white font-semibold text-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">-- Sélectionner une discipline --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="services-tab-container" class="space-y-6">
+                    <p class="text-sm text-gray-400 italic text-center py-6">Veuillez sélectionner une discipline ci-dessus.</p>
                 </div>
             </div>
         </section>
@@ -590,6 +614,8 @@
                 initTrmdTab();
             } else if (tabName === 'affectation') {
                 initAffectationTab();
+            } else if (tabName === 'services') {
+                initServicesTab();
             }
         }
 
@@ -715,7 +741,7 @@
         function calculateTrmdData() {
             let allDiscsSet = new Set();
 
-            // 1. Récupération stricte et exclusive des disciplines issues de la liste des enseignants et des ajouts manuels
+            // 1. Récupération des disciplines
             teachersData.forEach(t => {
                 if (t.discipline && t.discipline.trim() !== '') {
                     allDiscsSet.add(t.discipline.trim().toUpperCase());
@@ -730,7 +756,6 @@
             let totalsByDisc = {};
             uniqueDiscs.forEach(d => totalsByDisc[d] = 0);
 
-            // Fonction pour ajouter des heures uniquement si la discipline appartient au périmètre des enseignants/créations
             function addHoursToDisc(discName, hours) {
                 if (!discName) return;
                 const upperD = discName.trim().toUpperCase();
@@ -739,7 +764,7 @@
                 }
             }
 
-            // 2. Ajout des heures de Ventilation horaire par classe
+            // 2. Ventilation horaire par classe
             const ventilations = JSON.parse(sessionStorage.getItem('classVentilationHours')) || {};
             Object.values(ventilations).forEach(classMap => {
                 Object.keys(classMap).forEach(disc => {
@@ -747,7 +772,7 @@
                 });
             });
 
-            // 3. Ajout des heures de Groupes de spécialités
+            // 3. Groupes de spécialités
             const specialitesData = JSON.parse(sessionStorage.getItem('specialitesData')) || {};
             specialitesData.forEach(spec => {
                 const totalHours = (spec.groupes || 0) * (spec.heures || 0);
@@ -769,7 +794,7 @@
                 }
             });
 
-            // 4. Ajout des heures de Groupes particuliers
+            // 4. Groupes particuliers
             const particuliersData = JSON.parse(sessionStorage.getItem('particuliersData')) || {};
             particuliersData.forEach(part => {
                 if (part.discipline) {
@@ -777,7 +802,170 @@
                 }
             });
 
+            // 5. AJOUT DES PONDÉRATIONS ENSEIGNANTS
+            uniqueDiscs.forEach(disc => {
+                const stats = calculateTeacherServicesForDiscipline(disc);
+                totalsByDisc[disc] += stats.totalPonderationsDisc;
+            });
+
             return { uniqueDiscs, totalsByDisc };
+        }
+
+        // --- FONCTION AUXILIAIRE : CALCUL DÉTAILLÉ DES SERVICES ET PONDÉRATIONS ENSEIGNANTS ---
+        function calculateTeacherServicesForDiscipline(selectedDisc) {
+            if (!selectedDisc) return { teacherDetails: {}, totalPonderationsDisc: 0, totalHoursWithPond: 0 };
+
+            const upperDisc = selectedDisc.trim().toUpperCase();
+            const classDisciplinesAssignments = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
+            const allClasses = getComputedClassList();
+            const eligibleClasses = allClasses.filter(cls => classDisciplinesAssignments[cls.name] && classDisciplinesAssignments[cls.name].map(d => d.toUpperCase()).includes(upperDisc));
+            
+            const ventilations = JSON.parse(sessionStorage.getItem('classVentilationHours')) || {};
+            const specialitesData = JSON.parse(sessionStorage.getItem('specialitesData')) || {};
+            const specAssignments = JSON.parse(sessionStorage.getItem('specialiteTeacherAssignments')) || {};
+            const particuliersData = JSON.parse(sessionStorage.getItem('particuliersData')) || {};
+            const eligibleParticuliers = particuliersData.filter(part => part.discipline && part.discipline.trim().toUpperCase() === upperDisc);
+            const teacherAssignments = JSON.parse(sessionStorage.getItem('classTeacherAssignments')) || {};
+            const disabledPonderations = JSON.parse(sessionStorage.getItem('disabledPonderations')) || {};
+
+            const disciplineTeachers = teachersData.filter(t => t.discipline.trim().toUpperCase() === upperDisc);
+
+            let teacherDetails = {};
+            let totalPonderationsDisc = 0;
+
+            disciplineTeachers.forEach(t => {
+                const fullName = `${t.nom} ${t.prenom}`;
+                let hours1T = 0;
+                let hoursBts = 0;
+                let hoursOther = 0;
+
+                let assignedItems = [];
+
+                // A. Classes
+                eligibleClasses.forEach(cls => {
+                    const selectEl = document.getElementById(`assign-disc-${cls.name}`);
+                    const assignedName = selectEl ? selectEl.value : ((teacherAssignments[cls.name] && teacherAssignments[cls.name][upperDisc]) || '');
+                    if (assignedName === fullName) {
+                        const h = (ventilations[cls.name] && ventilations[cls.name][selectedDisc] !== undefined) ? parseFloat(ventilations[cls.name][selectedDisc]) || 0 : 0;
+                        
+                        assignedItems.push({
+                            type: 'Classe',
+                            name: cls.name,
+                            detail: cls.levelLabel,
+                            hours: h
+                        });
+
+                        if (['1re', 'Tale', '1re_TECH', 'Tale_TECH'].includes(cls.levelId)) {
+                            hours1T += h;
+                        } else if (cls.levelId === 'BTS') {
+                            hoursBts += h;
+                        } else {
+                            hoursOther += h;
+                        }
+                    }
+                });
+
+                // B. Spécialités (1re et Terminale Générale)
+                specialitesData.forEach((spec, sIdx) => {
+                    const totalHours = (spec.groupes || 0) * (spec.heures || 0);
+                    const assigned = specAssignments[sIdx] || {};
+
+                    if (spec.nom === 'Humanités, Littérature et Philosophie') {
+                        const p1 = (spec.part1 !== undefined ? spec.part1 : 50) / 100;
+                        const p2 = (spec.part2 !== undefined ? spec.part2 : 50) / 100;
+                        if (spec.disc1 && spec.disc1.toUpperCase() === upperDisc) {
+                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
+                            const cur1 = sel1 ? sel1.value : (assigned.ens1 || '');
+                            if (cur1 === fullName) {
+                                const h = totalHours * p1;
+                                hours1T += h;
+                                assignedItems.push({ type: 'Spécialité', name: `${spec.nom} (Partie 1)`, detail: spec.niveau, hours: h });
+                            }
+                        }
+                        if (spec.disc2 && spec.disc2.toUpperCase() === upperDisc) {
+                            const sel2 = document.getElementById(`assign-spec-${sIdx}-2`);
+                            const cur2 = sel2 ? sel2.value : (assigned.ens2 || '');
+                            if (cur2 === fullName) {
+                                const h = totalHours * p2;
+                                hours1T += h;
+                                assignedItems.push({ type: 'Spécialité', name: `${spec.nom} (Partie 2)`, detail: spec.niveau, hours: h });
+                            }
+                        }
+                    } else if (spec.nom === 'Langues, Littératures et Cultures Étrangères' && spec.llcerAssocs) {
+                        const nbAssocs = spec.llcerAssocs.filter(a => a.discipline).length;
+                        if (nbAssocs > 0) {
+                            const hoursPerAssoc = totalHours / nbAssocs;
+                            spec.llcerAssocs.forEach((assoc, aIdx) => {
+                                if (assoc.discipline && assoc.discipline.toUpperCase() === upperDisc) {
+                                    const selLlcer = document.getElementById(`assign-spec-${sIdx}-llcer_${aIdx}`);
+                                    const curLlcer = selLlcer ? selLlcer.value : (assigned.llcer && assigned.llcer[aIdx] ? assigned.llcer[aIdx] : '');
+                                    if (curLlcer === fullName) {
+                                        hours1T += hoursPerAssoc;
+                                        assignedItems.push({ type: 'Spécialité', name: `${spec.nom} (${assoc.langue || 'Langue'})`, detail: spec.niveau, hours: hoursPerAssoc });
+                                    }
+                                }
+                            });
+                        }
+                    } else {
+                        if (spec.disc1 && spec.disc1.toUpperCase() === upperDisc) {
+                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
+                            const cur1 = sel1 ? sel1.value : (assigned.ens1 || '');
+                            if (cur1 === fullName) {
+                                hours1T += totalHours;
+                                assignedItems.push({ type: 'Spécialité', name: spec.nom, detail: spec.niveau, hours: totalHours });
+                            }
+                        }
+                    }
+                });
+
+                // C. Groupes particuliers
+                eligibleParticuliers.forEach((part) => {
+                    const originalIndex = particuliersData.indexOf(part);
+                    const selectEl = document.getElementById(`assign-part-${originalIndex}`);
+                    const assignedName = selectEl ? selectEl.value : (part.enseignant || '');
+                    if (assignedName === fullName) {
+                        const h = parseFloat(part.quotite) || 0;
+                        const pondType = part.ponderation || 'none';
+                        const partName = part.nom || `Groupe particulier ${originalIndex + 1}`;
+
+                        assignedItems.push({ type: 'Groupe particulier', name: partName, detail: pondType !== 'none' ? `Pond. ${pondType}` : 'Sans pondération', hours: h });
+
+                        if (pondType === '0.1') {
+                            hours1T += h;
+                        } else if (pondType === '0.25') {
+                            hoursBts += h;
+                        } else {
+                            hoursOther += h;
+                        }
+                    }
+                });
+
+                // Calculs des pondérations
+                const isPondDisabled = !!disabledPonderations[fullName];
+                const pond1T = isPondDisabled ? 0 : Math.min(1.0, Math.round((0.1 * hours1T) * 100) / 100);
+                const pondBts = Math.round((0.25 * hoursBts) * 100) / 100;
+
+                const rawHours = hours1T + hoursBts + hoursOther;
+                const totalWithPond = rawHours + pond1T + pondBts;
+
+                totalPonderationsDisc += (pond1T + pondBts);
+
+                teacherDetails[fullName] = {
+                    nom: t.nom,
+                    prenom: t.prenom,
+                    rawHours,
+                    hours1T,
+                    hoursBts,
+                    hoursOther,
+                    pond1T,
+                    pondBts,
+                    totalWithPond,
+                    isPondDisabled,
+                    assignedItems
+                };
+            });
+
+            return { teacherDetails, totalPonderationsDisc };
         }
 
         // Alias pour l'affectation des enseignants
@@ -839,6 +1027,146 @@
                     norwegianDisplay.className = "text-lg font-bold text-amber-700";
                 }
             }
+        }
+
+        // --- GESTION DE L'ONGLET SERVICES DES ENSEIGNANTS ---
+        function initServicesTab() {
+            const selectEl = document.getElementById('services-disc-select');
+            let allDiscsSet = new Set(teachersData.map(t => t.discipline).filter(d => d && d.trim() !== ''));
+            let customDiscs = JSON.parse(sessionStorage.getItem('customDisciplines')) || [];
+            customDiscs.forEach(d => allDiscsSet.add(d));
+            const uniqueDiscs = [...allDiscsSet].sort();
+
+            const currentVal = selectEl.value;
+            let optionsHtml = `<option value="">-- Sélectionner une discipline --</option>`;
+            uniqueDiscs.forEach(d => {
+                const isSel = currentVal === d ? 'selected' : '';
+                optionsHtml += `<option value="${escapeHtml(d)}" ${isSel}>${escapeHtml(d)}</option>`;
+            });
+            selectEl.innerHTML = optionsHtml;
+
+            if (currentVal && uniqueDiscs.includes(currentVal)) {
+                selectEl.value = currentVal;
+                renderTeacherServicesTab();
+            } else if (uniqueDiscs.length > 0) {
+                selectEl.value = uniqueDiscs[0];
+                renderTeacherServicesTab();
+            } else {
+                document.getElementById('services-tab-container').innerHTML = `<p class="text-sm text-gray-400 italic text-center py-6">Aucune discipline disponible.</p>`;
+            }
+        }
+
+        function renderTeacherServicesTab() {
+            const selectEl = document.getElementById('services-disc-select');
+            const selectedDisc = selectEl.value;
+            const container = document.getElementById('services-tab-container');
+
+            if (!selectedDisc) {
+                container.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-6">Veuillez sélectionner une discipline ci-dessus.</p>`;
+                return;
+            }
+
+            const { teacherDetails } = calculateTeacherServicesForDiscipline(selectedDisc);
+            const teacherNames = Object.keys(teacherDetails);
+
+            if (teacherNames.length === 0) {
+                container.innerHTML = `<p class="text-sm text-gray-400 italic text-center py-6">Aucun enseignant enregistré pour la discipline "${escapeHtml(selectedDisc)}".</p>`;
+                return;
+            }
+
+            // Tri alphabétique sur le NOM de famille
+            teacherNames.sort((a, b) => {
+                const nomA = teacherDetails[a].nom.toUpperCase();
+                const nomB = teacherDetails[b].nom.toUpperCase();
+                return nomA.localeCompare(nomB, 'fr');
+            });
+
+            let html = `<div class="grid grid-cols-1 md:grid-cols-2 gap-6">`;
+
+            teacherNames.forEach(fullName => {
+                const details = teacherDetails[fullName];
+                const items = details.assignedItems || [];
+
+                html += `
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                        <div>
+                            <div class="bg-blue-900 text-white p-4 flex justify-between items-center">
+                                <h3 class="font-bold text-base tracking-wide">${escapeHtml(details.nom)} ${escapeHtml(details.prenom)}</h3>
+                                <span class="bg-blue-800 border border-blue-700 text-xs px-2.5 py-1 rounded font-semibold text-blue-100">${escapeHtml(selectedDisc)}</span>
+                            </div>
+                            <div class="p-4 space-y-4">
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase text-gray-500 tracking-wider mb-2 border-b pb-1">Enseignements & Groupes attribués</h4>
+                `;
+
+                if (items.length === 0) {
+                    html += `<p class="text-xs text-gray-400 italic py-2">Aucun enseignement affecté pour le moment.</p>`;
+                } else {
+                    html += `<ul class="space-y-2">`;
+                    items.forEach(it => {
+                        let badgeColor = "bg-blue-50 text-blue-800 border-blue-200";
+                        if (it.type === 'Spécialité') badgeColor = "bg-emerald-50 text-emerald-800 border-emerald-200";
+                        if (it.type === 'Groupe particulier') badgeColor = "bg-indigo-50 text-indigo-800 border-indigo-200";
+
+                        html += `
+                            <li class="flex justify-between items-center text-xs p-2 rounded border border-gray-100 bg-gray-50/50">
+                                <div>
+                                    <span class="inline-block px-1.5 py-0.5 rounded text-[10px] font-bold border ${badgeColor} mr-1.5">${escapeHtml(it.type)}</span>
+                                    <span class="font-semibold text-gray-800">${escapeHtml(it.name)}</span>
+                                    <span class="text-gray-400 ml-1">(${escapeHtml(it.detail)})</span>
+                                </div>
+                                <span class="font-bold text-gray-700">${Math.round(it.hours * 100) / 100} h</span>
+                            </li>
+                        `;
+                    });
+                    html += `</ul>`;
+                }
+
+                html += `
+                                </div>
+
+                                <!-- Bloc Pondérations -->
+                                <div>
+                                    <h4 class="text-xs font-bold uppercase text-gray-500 tracking-wider mb-2 border-b pb-1">Pondérations appliquées</h4>
+                                    <div class="space-y-1.5 text-xs">
+                                        <div class="flex justify-between items-center bg-blue-50/60 p-2 rounded border border-blue-100">
+                                            <span class="font-medium text-blue-900">Pondération 1re / Tle :</span>
+                                            <span class="font-bold text-blue-800">+${details.pond1T} h</span>
+                                        </div>
+                `;
+
+                if (details.hoursBts > 0) {
+                    html += `
+                        <div class="flex justify-between items-center bg-indigo-50/60 p-2 rounded border border-indigo-100">
+                            <span class="font-medium text-indigo-900">Pondération BTS (0,25 × ${details.hoursBts}h) :</span>
+                            <span class="font-bold text-indigo-800">+${details.pondBts} h</span>
+                        </div>
+                    `;
+                }
+
+                html += `
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pied de Carte : Total Service -->
+                        <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs text-gray-500 block">Heures brutes : ${Math.round(details.rawHours * 100) / 100} h</span>
+                                <span class="text-xs text-gray-500 block">Pondérations : +${Math.round((details.pond1T + details.pondBts) * 100) / 100} h</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs font-semibold text-gray-500 block">Total Service :</span>
+                                <span class="text-lg font-black text-blue-700">${Math.round(details.totalWithPond * 100) / 100} h</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
         }
 
         // --- GESTION DE L'ONGLET LISTE DES ENSEIGNANTS ---
@@ -1270,6 +1598,7 @@
             let html = '';
             savedData.forEach((item, index) => {
                 const disc = item.discipline || '';
+                const pond = item.ponderation || 'none';
 
                 html += `
                     <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4 particulier-row" data-index="${index}">
@@ -1279,19 +1608,29 @@
                             </div>
                             <div class="flex items-center space-x-3">
                                 <div class="flex items-center space-x-1">
-                                    <span class="text-xs text-gray-600 font-medium">Quotité horaire :</span>
+                                    <span class="text-xs text-gray-600 font-medium">Quotité :</span>
                                     <input type="number" min="0" step="0.5" value="${item.quotite !== undefined ? item.quotite : 2}" onchange="updateParticulierField(${index}, 'quotite', parseFloat(this.value) || 0); updateParticulierCounters();" class="w-20 border border-gray-300 rounded px-2 py-1 text-sm text-center font-bold bg-white text-indigo-700">
                                 </div>
                                 <button onclick="removeParticulierRow(${index})" class="text-red-500 hover:text-red-700 font-bold px-2 py-1">&times;</button>
                             </div>
                         </div>
 
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 mb-1">Discipline associée</label>
-                            <select onchange="updateParticulierField(${index}, 'discipline', this.value); renderParticuliersRows();" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-                                <option value="">-- Choisir une discipline --</option>
-                                ${availableDisciplines.map(d => `<option value="${escapeHtml(d)}" ${disc === d ? 'selected' : ''}>${escapeHtml(d)}</option>`).join('')}
-                            </select>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Discipline associée</label>
+                                <select onchange="updateParticulierField(${index}, 'discipline', this.value); renderParticuliersRows();" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="">-- Choisir une discipline --</option>
+                                    ${availableDisciplines.map(d => `<option value="${escapeHtml(d)}" ${disc === d ? 'selected' : ''}>${escapeHtml(d)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-600 mb-1">Pondération applicable</label>
+                                <select onchange="updateParticulierField(${index}, 'ponderation', this.value);" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm bg-white font-semibold text-blue-900 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                                    <option value="none" ${pond === 'none' ? 'selected' : ''}>Aucune (0)</option>
+                                    <option value="0.1" ${pond === '0.1' ? 'selected' : ''}>Pondération 0,1 (1re / Tle)</option>
+                                    <option value="0.25" ${pond === '0.25' ? 'selected' : ''}>Pondération 0,25 (BTS)</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -1317,7 +1656,8 @@
             savedData.push({
                 nom: '',
                 discipline: '',
-                quotite: 2
+                quotite: 2,
+                ponderation: 'none'
             });
             sessionStorage.setItem('particuliersData', JSON.stringify(savedData));
             renderParticuliersRows();
@@ -2357,7 +2697,7 @@
                 `;
             });
 
-            // B. Affichage des groupes de spécialités correspondants
+            // B. Groupes de spécialités
             specialitesData.forEach((spec, sIdx) => {
                 const totalHours = (spec.groupes || 0) * (spec.heures || 0);
                 const assigned = specAssignments[sIdx] || {};
@@ -2389,16 +2729,17 @@
                 }
             });
 
-            // C. Affichage des groupes particuliers
+            // C. Groupes particuliers
             eligibleParticuliers.forEach((part) => {
                 const originalIndex = particuliersData.indexOf(part);
                 const partName = part.nom || `Groupe particulier ${originalIndex + 1}`;
                 const partHours = parseFloat(part.quotite) || 0;
                 const currentAssigned = part.enseignant || '';
+                const pondText = part.ponderation === '0.1' ? ' [Pond. 0,1]' : (part.ponderation === '0.25' ? ' [Pond. 0,25]' : '');
 
                 html += `
                     <tr class="hover:bg-gray-50 bg-indigo-50/20">
-                        <td class="py-3 px-4 font-semibold text-indigo-900">Groupe particulier : ${escapeHtml(partName)}</td>
+                        <td class="py-3 px-4 font-semibold text-indigo-900">Groupe particulier : ${escapeHtml(partName)} <span class="text-xs font-normal text-indigo-700">${pondText}</span></td>
                         <td class="py-3 px-4 text-center font-bold text-indigo-700">${partHours} h</td>
                         <td class="py-3 px-4">
                             <select id="assign-part-${originalIndex}" onchange="updateTeacherServiceSubtotalView('${escapeHtml(selectedDisc)}')" class="w-full sm:w-80 border border-gray-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
@@ -2420,79 +2761,24 @@
 
             html += `</tbody></table></div>`;
 
-            // Récapitulatif
+            // RÉCAPITULATIF DES SERVICES AVEC PONDÉRATIONS
             html += `
                 <div class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3">
-                    <h3 class="text-md font-bold text-blue-900 border-b pb-2">Récapitulatif des services pour cette discipline</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="teacher-subtotals-grid">
+                    <h3 class="text-md font-bold text-blue-900 border-b pb-2">Récapitulatif des services et pondérations pour cette discipline</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="teacher-subtotals-grid">
             `;
 
             disciplineTeachers.forEach(t => {
                 const fullName = `${t.nom} ${t.prenom}`;
-                let teacherTotalHours = 0;
-
-                // Heures classes
-                eligibleClasses.forEach(cls => {
-                    const selectEl = document.getElementById(`assign-disc-${cls.name}`);
-                    const assignedName = selectEl ? selectEl.value : ((teacherAssignments[cls.name] && teacherAssignments[cls.name][selectedDisc]) || '');
-                    if (assignedName === fullName) {
-                        teacherTotalHours += (ventilations[cls.name] && ventilations[cls.name][selectedDisc] !== undefined) ? parseFloat(ventilations[cls.name][selectedDisc]) || 0 : 0;
-                    }
-                });
-
-                // Heures spécialités
-                specialitesData.forEach((spec, sIdx) => {
-                    const totalHours = (spec.groupes || 0) * (spec.heures || 0);
-                    const assigned = specAssignments[sIdx] || {};
-
-                    if (spec.nom === 'Humanités, Littérature et Philosophie') {
-                        const p1 = (spec.part1 !== undefined ? spec.part1 : 50) / 100;
-                        const p2 = (spec.part2 !== undefined ? spec.part2 : 50) / 100;
-                        if (spec.disc1 && spec.disc1.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
-                            const curEns1 = sel1 ? sel1.value : (assigned.ens1 || '');
-                            if (curEns1 === fullName) teacherTotalHours += totalHours * p1;
-                        }
-                        if (spec.disc2 && spec.disc2.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel2 = document.getElementById(`assign-spec-${sIdx}-2`);
-                            const curEns2 = sel2 ? sel2.value : (assigned.ens2 || '');
-                            if (curEns2 === fullName) teacherTotalHours += totalHours * p2;
-                        }
-                    } else if (spec.nom === 'Langues, Littératures et Cultures Étrangères' && spec.llcerAssocs) {
-                        const nbAssocs = spec.llcerAssocs.filter(a => a.discipline).length;
-                        if (nbAssocs > 0) {
-                            const hoursPerAssoc = totalHours / nbAssocs;
-                            spec.llcerAssocs.forEach((assoc, aIdx) => {
-                                if (assoc.discipline && assoc.discipline.toUpperCase() === selectedDisc.toUpperCase()) {
-                                    const selLlcer = document.getElementById(`assign-spec-${sIdx}-llcer_${aIdx}`);
-                                    const curEnsLlcer = selLlcer ? selLlcer.value : (assigned.llcer && assigned.llcer[aIdx] ? assigned.llcer[aIdx] : '');
-                                    if (curEnsLlcer === fullName) teacherTotalHours += hoursPerAssoc;
-                                }
-                            });
-                        }
-                    } else {
-                        if (spec.disc1 && spec.disc1.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
-                            const curEns1 = sel1 ? sel1.value : (assigned.ens1 || '');
-                            if (curEns1 === fullName) teacherTotalHours += totalHours;
-                        }
-                    }
-                });
-
-                // Heures groupes particuliers
-                eligibleParticuliers.forEach((part) => {
-                    const originalIndex = particuliersData.indexOf(part);
-                    const selectEl = document.getElementById(`assign-part-${originalIndex}`);
-                    const assignedName = selectEl ? selectEl.value : (part.enseignant || '');
-                    if (assignedName === fullName) {
-                        teacherTotalHours += parseFloat(part.quotite) || 0;
-                    }
-                });
-
                 html += `
-                    <div class="bg-white p-3 rounded border border-gray-200 shadow-sm flex justify-between items-center" data-teacher-card="${escapeHtml(fullName)}">
-                        <span class="text-sm font-semibold text-gray-800">${escapeHtml(fullName)}</span>
-                        <span class="text-sm font-bold text-blue-700 teacher-card-hours">${Math.round(teacherTotalHours * 100) / 100} h</span>
+                    <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-sm space-y-2" data-teacher-card="${escapeHtml(fullName)}">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-sm font-bold text-gray-800">${escapeHtml(fullName)}</span>
+                            <span class="text-base font-extrabold text-blue-700 teacher-card-hours">0 h</span>
+                        </div>
+                        <div class="space-y-1 text-xs text-gray-600 teacher-card-details">
+                            <!-- Rempli dynamiquement -->
+                        </div>
                     </div>
                 `;
             });
@@ -2500,6 +2786,7 @@
             html += `</div></div>`;
 
             container.innerHTML = html;
+            updateTeacherServiceSubtotalView(selectedDisc);
         }
 
         function renderSpecRowHtml(sIdx, subKey, label, hours, currentAssigned, disciplineTeachers) {
@@ -2526,78 +2813,68 @@
             return html;
         }
 
+        // --- MISE À JOUR DYNAMIQUE DES CARTES D'ENSEIGNANTS ---
         function updateTeacherServiceSubtotalView(selectedDisc) {
-            const disciplineTeachers = teachersData.filter(t => t.discipline.trim().toUpperCase() === selectedDisc.trim().toUpperCase());
-            const classDisciplinesAssignments = JSON.parse(sessionStorage.getItem('classDisciplinesAssignments')) || {};
-            const allClasses = getComputedClassList();
-            const eligibleClasses = allClasses.filter(cls => classDisciplinesAssignments[cls.name] && classDisciplinesAssignments[cls.name].map(d => d.toUpperCase()).includes(selectedDisc.toUpperCase()));
-            const ventilations = JSON.parse(sessionStorage.getItem('classVentilationHours')) || {};
-            
-            const specialitesData = JSON.parse(sessionStorage.getItem('specialitesData')) || {};
-            const specAssignments = JSON.parse(sessionStorage.getItem('specialiteTeacherAssignments')) || {};
+            const { teacherDetails } = calculateTeacherServicesForDiscipline(selectedDisc);
 
-            const particuliersData = JSON.parse(sessionStorage.getItem('particuliersData')) || {};
-            const eligibleParticuliers = particuliersData.filter(part => part.discipline && part.discipline.trim().toUpperCase() === selectedDisc.trim().toUpperCase());
-
-            disciplineTeachers.forEach(t => {
-                const fullName = `${t.nom} ${t.prenom}`;
-                let teacherTotalHours = 0;
-
-                eligibleClasses.forEach(cls => {
-                    const selectEl = document.getElementById(`assign-disc-${cls.name}`);
-                    if (selectEl && selectEl.value === fullName) {
-                        teacherTotalHours += (ventilations[cls.name] && ventilations[cls.name][selectedDisc] !== undefined) ? parseFloat(ventilations[cls.name][selectedDisc]) || 0 : 0;
-                    }
-                });
-
-                specialitesData.forEach((spec, sIdx) => {
-                    const totalHours = (spec.groupes || 0) * (spec.heures || 0);
-                    if (spec.nom === 'Humanités, Littérature et Philosophie') {
-                        const p1 = (spec.part1 !== undefined ? spec.part1 : 50) / 100;
-                        const p2 = (spec.part2 !== undefined ? spec.part2 : 50) / 100;
-                        if (spec.disc1 && spec.disc1.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
-                            if (sel1 && sel1.value === fullName) teacherTotalHours += totalHours * p1;
-                        }
-                        if (spec.disc2 && spec.disc2.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel2 = document.getElementById(`assign-spec-${sIdx}-2`);
-                            if (sel2 && sel2.value === fullName) teacherTotalHours += totalHours * p2;
-                        }
-                    } else if (spec.nom === 'Langues, Littératures et Cultures Étrangères' && spec.llcerAssocs) {
-                        const nbAssocs = spec.llcerAssocs.filter(a => a.discipline).length;
-                        if (nbAssocs > 0) {
-                            const hoursPerAssoc = totalHours / nbAssocs;
-                            spec.llcerAssocs.forEach((assoc, aIdx) => {
-                                if (assoc.discipline && assoc.discipline.toUpperCase() === selectedDisc.toUpperCase()) {
-                                    const selLlcer = document.getElementById(`assign-spec-${sIdx}-llcer_${aIdx}`);
-                                    if (selLlcer && selLlcer.value === fullName) teacherTotalHours += hoursPerAssoc;
-                                }
-                            });
-                        }
-                    } else {
-                        if (spec.disc1 && spec.disc1.toUpperCase() === selectedDisc.toUpperCase()) {
-                            const sel1 = document.getElementById(`assign-spec-${sIdx}-1`);
-                            if (sel1 && sel1.value === fullName) teacherTotalHours += totalHours;
-                        }
-                    }
-                });
-
-                eligibleParticuliers.forEach((part) => {
-                    const originalIndex = particuliersData.indexOf(part);
-                    const selectEl = document.getElementById(`assign-part-${originalIndex}`);
-                    if (selectEl && selectEl.value === fullName) {
-                        teacherTotalHours += parseFloat(part.quotite) || 0;
-                    }
-                });
-
+            Object.keys(teacherDetails).forEach(fullName => {
+                const details = teacherDetails[fullName];
                 const card = document.querySelector(`[data-teacher-card="${CSS.escape(fullName)}"]`);
-                if (card) {
-                    const hoursSpan = card.querySelector('.teacher-card-hours');
-                    if (hoursSpan) {
-                        hoursSpan.textContent = `${Math.round(teacherTotalHours * 100) / 100} h`;
+                if (!card) return;
+
+                const hoursSpan = card.querySelector('.teacher-card-hours');
+                if (hoursSpan) {
+                    hoursSpan.textContent = `${Math.round(details.totalWithPond * 100) / 100} h`;
+                }
+
+                const detailsDiv = card.querySelector('.teacher-card-details');
+                if (detailsDiv) {
+                    let detailsHtml = `
+                        <div class="flex justify-between items-center text-gray-500">
+                            <span>Heures d'enseignement brutes :</span>
+                            <span class="font-semibold">${Math.round(details.rawHours * 100) / 100} h</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-blue-50/50 p-1.5 rounded border border-blue-100">
+                            <label class="inline-flex items-center space-x-1.5 cursor-pointer">
+                                <input type="checkbox" ${!details.isPondDisabled ? 'checked' : ''} onchange="toggleTeacherPonderation('${escapeHtml(fullName)}', this.checked, '${escapeHtml(selectedDisc)}')" class="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5">
+                                <span class="font-medium text-blue-900">Pondération 1re / Tle (Max 1.0h) :</span>
+                            </label>
+                            <span class="font-bold text-blue-800">+${details.pond1T} h</span>
+                        </div>
+                    `;
+
+                    if (details.hoursBts > 0) {
+                        detailsHtml += `
+                            <div class="flex justify-between items-center bg-indigo-50/50 p-1.5 rounded border border-indigo-100">
+                                <span class="font-medium text-indigo-900">Pondération BTS (0,25 × ${details.hoursBts}h) :</span>
+                                <span class="font-bold text-indigo-800">+${details.pondBts} h</span>
+                            </div>
+                        `;
                     }
+
+                    detailsDiv.innerHTML = detailsHtml;
                 }
             });
+
+            // Mise à jour du total de la discipline en haut de l'onglet
+            const trmdTotalLbl = document.getElementById('affectation-disc-trmd-total');
+            if (trmdTotalLbl) {
+                const { totalsByDisc } = calculateTrmdData();
+                const discTrmdTotal = totalsByDisc[selectedDisc.toUpperCase()] || 0;
+                trmdTotalLbl.textContent = `${Math.round(discTrmdTotal * 100) / 100} h`;
+            }
+        }
+
+        // --- ACTIVER / DÉSACTIVER LA PONDÉRATION 1RE/TLE POUR UN ENSEIGNANT ---
+        function toggleTeacherPonderation(fullName, isEnabled, selectedDisc) {
+            let disabledPonderations = JSON.parse(sessionStorage.getItem('disabledPonderations')) || {};
+            if (isEnabled) {
+                delete disabledPonderations[fullName];
+            } else {
+                disabledPonderations[fullName] = true;
+            }
+            sessionStorage.setItem('disabledPonderations', JSON.stringify(disabledPonderations));
+            updateTeacherServiceSubtotalView(selectedDisc);
         }
 
         function saveTeacherAssignmentsByDisc() {
